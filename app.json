@@ -1,0 +1,57 @@
+{
+  "id": "nl.nefit.easy",
+  "version": "1.0.0",
+  "compatibility": ">=0.1.0",
+  "name": {
+    "en": "Nefit Easy",
+    "nl": "Nefit Easy"
+  },
+  "description": {
+    "en": "Nefit Easy thermostat",
+    "nl": "Nefit Easy thermostaat"
+  },
+  "author": {
+    "name": "Athom B.V."
+  },
+  "category": "climate",
+  "images": {
+    "large": "assets/images/large.png",
+    "small": "assets/images/small.png"
+  },
+  "permissions": [
+  ],
+  "speech": [
+  ],
+  "drivers": [
+    {
+      "id": "nefit_easy",
+      "name": {
+        "en": "Nefit Easy",
+        "nl": "Nefit Easy"
+      },
+      "images": {
+        "large": "drivers/nefit_easy/assets/images/large.png",
+        "small": "drivers/nefit_easy/assets/images/small.png"
+      },
+      "class": "thermostat",
+      "capabilities": [
+        "target_temperature",
+        "measure_temperature"
+      ],
+      "pair": [
+        {
+          "id": "nefit_setup",
+          "navigation": {
+            "next": "add_nefit_easy"
+          }
+        },
+        {
+          "id": "add_nefit_easy",
+          "template": "add_devices"
+        }
+      ]
+    }
+  ],
+  "flow": {
+  }
+}
