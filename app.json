@@ -40,14 +40,10 @@
       ],
       "pair": [
         {
-          "id": "nefit_setup",
-          "navigation": {
-            "next": "add_nefit_easy"
-          }
+          "id": "nefit_setup"
         },
         {
-          "id": "add_nefit_easy",
-          "template": "add_devices"
+          "id": "add_nefit_easy"
         }
       ]
     }

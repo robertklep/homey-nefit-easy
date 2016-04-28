@@ -1,3 +1,15 @@
 {
-
+  "pair": {
+    "setup_intro": "Om Homey met je Nefit Easy te laten samenwerken hebben we wat meer informatie nodig.",
+    "setup_failed": "Homey kon je Nefit Easy niet vinden, controleer of de informatie hieronder klopt en probeer het opnieuw.",
+    "setup_succeeded": "Je kunt nu je Nefit Easy bedienen met Homey!",
+    "settings": "Instellingen",
+    "serialnumber": "Serienummer",
+    "accesskey": "Toegangscode",
+    "setup": "Nefit Easy Setup",
+    "password": "Wachtwoord",
+    "add": "Voeg toe",
+    "done": "Nefit Easy toegevoegd"
+  },
+  "not_reachable": "Het apparaat kon niet worden bereikt"
 }

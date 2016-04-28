@@ -1,75 +1,98 @@
-const NefitEasyClient = require('nefit-easy-commands');
+var NefitEasyClient = require('nefit-easy-commands');
 
-var devices = [];
+// Keep a list of all clients
+var clients = [];
 
 /**
- *
+ * When driver is started, make sure all clients are reconnected
  */
 module.exports.init = function (devices_data, callback) {
 
-	// Loop over all installed devices and reconnect them
+	// Loop over all installed devices and re-establish clients
 	for (var x = 0; x < devices_data.length; x++) {
 
-		// Reconnect
-		reconnectClient(devices_data[x].id, function (err, device) {
-			if (!err && device) {
+		// Wrap createClient function to keep the variables in scope
+		function wrapperFunction(device_data) {
 
-				// If success, add it as device
-				devices.push(device);
-			}
-		});
+			// Reconnect
+			createClient(device_data, function (err, client) {
+				if (!err && client) {
+
+					// If success, add it
+					addOrUpdateClient(client);
+
+					// Mark as available
+					module.exports.setAvailable({id: device_data.id});
+				}
+				else {
+
+					// Could not create client to connect to device
+					module.exports.setUnavailable({id: device_data.id}, __("not_reachable"));
+				}
+			});
+		}
+
+		// Trigger createClient
+		wrapperFunction(devices_data[x]);
 	}
+
+	// To simulate realtime events we have to poll
+	startPolling();
 
 	// Ready
 	callback(null, true);
 };
 
 /**
- * TODO build input fields for serial/access_key/password -> bcrypt!
+ * Pairing process for the Nefit Easy
  */
 module.exports.pair = function (socket) {
 
-	// Show list of devices
-	socket.on("nefit_setup", function (data, callback) {
+	socket.on("validate_device", function (settings, callback) {
 
-		// TODO Handle incoming nefit credentials
-
-		// TODO Verify credentials
-
-		// TODO Safe encrypted
-
-		// Instantiate client
-		const client = NefitEasyClient({
-			serialNumber: data.serialNumber,
-			accessKey: data.accessKey,
-			password: data.password
+		// Try to create a client and connect to it
+		var client = NefitEasyClient({
+			serialNumber: settings.serialNumber,
+			accessKey: settings.accessKey,
+			password: settings.password
 		});
+
+		// Create a timeout for when connection fails
+		var timeout = setTimeout(function () {
+			callback(true, null);
+		}, 10000);
 
 		// Establish connection to client
 		client.connect().then(function () {
 
-			// Construct device
-			var device = {
-				name: "Nefit Easy",
-				data: {
-					id: data.serialNumber,
-					client: client
-				}
-			};
+			// Clear error callback
+			clearTimeout(timeout);
 
-			// Return device
-			callback(null, device);
+			// Create id
+			settings.id = new Buffer(settings.serialNumber + settings.accessKey).toString('base64');
+
+			// Return settings
+			callback(null, settings);
+		}).catch(function () {
+
+			// Request could not be made
+			callback(true, null);
 		});
 	});
 
 	// Add device to homey
-	socket.on("add_device", function (device, callback) {
+	socket.on("add_device", function (device) {
 
-		// Store device globally
-		devices.push(device);
+		// Store client globally
+		addOrUpdateClient(
+			NefitEasyClient({
+				serialNumber: device.data.serialNumber,
+				accessKey: device.data.accessKey,
+				password: device.data.password
+			})
+		);
 	});
-}
-;
+};
 
 /**
  * These functions represent the capabilities of Toon
@@ -81,17 +104,40 @@ module.exports.capabilities = {
 		get: function (device_data, callback) {
 			if (device_data instanceof Error) return callback(device_data);
 
-			// Get device
-			var device = getDevice(device_data.id);
+			// Get client
+			var client = getClient(device_data.serialNumber, device_data.accessKey);
+			if (client) {
 
-			// Check if device is present and contains data and client
-			if (device && device.data && device.data.client) {
+				// Check if data already present
+				if (client.target_temperature) {
+					callback(null, client.target_temperature);
+				}
+				else {
+					// Create a timeout for when connection fails
+					var timeout = setTimeout(function () {
+						callback(true, null);
+					}, 10000);
 
-				// TODO is this async? Fetch status
-				var status = device.data.client.status();
+					// Connect client and retrieve status
+					client.connect().then(function () {
+						return [client.status(), client.pressure()];
+					}).spread(function (status) {
 
-				// Return result
-				callback(null, status['temp setpoint']);
+						// Clear error callback
+						clearTimeout(timeout);
+
+						// Return received value
+						callback(null, status['temp setpoint']);
+
+					}).catch(function () {
+
+						// Clear error callback
+						clearTimeout(timeout);
+
+						// Something went wrong
+						callback(true, false);
+					});
+				}
 			}
 			else {
 				callback(true, false);
@@ -101,18 +147,34 @@ module.exports.capabilities = {
 		set: function (device_data, temperature, callback) {
 			if (device_data instanceof Error) return callback(device_data);
 
-			// Get device
-			var device = getDevice(device_data.id);
+			// Get client
+			var client = getClient(device_data.serialNumber, device_data.accessKey);
+			if (client) {
+				// Create a timeout for when connection fails
+				var timeout = setTimeout(function () {
+					callback(true, null);
+				}, 10000);
 
-			// Check if device is present and contains data and client
-			if (device && device.data && device.data.client) {
+				// Connect client and retrieve status
+				client.connect().then(function () {
 
-				// TODO is this async? Fetch status
-				// TODO check for valid temperature value (between ? and ?)
-				device.data.client.setTemperature(temperature);
+					// Set temperature
+					client.setTemperature(Math.round(temperature.toFixed(1) * 2) / 2);
 
-				// Return result
-				callback(null, temperature);
+					// Clear error callback
+					clearTimeout(timeout);
+
+					// Return received value
+					callback(null, temperature);
+
+				}).catch(function () {
+
+					// Clear error callback
+					clearTimeout(timeout);
+
+					// Something went wrong
+					callback(true, false);
+				});
 			}
 			else {
 				callback(true, false);
@@ -125,17 +187,40 @@ module.exports.capabilities = {
 		get: function (device_data, callback) {
 			if (device_data instanceof Error) return callback(device_data);
 
-			// Get device
-			var device = getDevice(device_data.id);
+			// Get client
+			var client = getClient(device_data.serialNumber, device_data.accessKey);
+			if (client) {
 
-			// Check if device is present and contains data and client
-			if (device && device.data && device.data.client) {
+				// Check if data already present
+				if (client.measure_temperature) {
+					callback(null, client.measure_temperature);
+				}
+				else {
+					// Create a timeout for when connection fails
+					var timeout = setTimeout(function () {
+						callback(true, null);
+					}, 10000);
 
-				// TODO is this async? Fetch status
-				var status = device.data.client.status();
+					// Connect client and retrieve status
+					client.connect().then(function () {
+						return [client.status(), client.pressure()];
+					}).spread(function (status) {
 
-				// Return result
-				callback(null, status['in house temp']);
+						// Clear error callback
+						clearTimeout(timeout);
+
+						// Return received value
+						callback(null, status['in house temp']);
+
+					}).catch(function () {
+
+						// Clear error callback
+						clearTimeout(timeout);
+
+						// Something went wrong
+						callback(true, false);
+					});
+				}
 			}
 			else {
 				callback(true, false);
@@ -149,12 +234,18 @@ module.exports.capabilities = {
  * @param device_data
  */
 module.exports.deleted = function (device_data) {
-	var device = getDevice(device_data.id);
 
-	// Find device and delete
-	var device_index = devices.indexOf(device);
-	if (device_index > -1) {
-		devices.splice(device_index, 1);
+	// Try to find client
+	var client_index = -1;
+	for (var x = 0; x < clients.length; x++) {
+		if (clients[x].opts.serialNumber === device_data.serialNumber && clients[x].opts.accessKey === device_data.accessKey) {
+			client_index = x;
+		}
+	}
+
+	// If client found, remove it
+	if (client_index > -1) {
+		clients.splice(client_index, 1);
 	}
 };
 
@@ -164,28 +255,41 @@ module.exports.deleted = function (device_data) {
  * @param device_id
  * @param callback
  */
-function reconnectClient(device_id, callback) {
-
-	// Get device
-	var device = getDevice(device_id);
+function createClient(device_data, callback) {
 
 	// Check if device is present and contains data and client
-	if (device && device.data && device.data.client) {
+	if (device_data && device_data.serialNumber && device_data.accessKey && device_data.password) {
+
+		// Try to create a client and connect to it
+		var client = NefitEasyClient({
+			serialNumber: device_data.serialNumber,
+			accessKey: device_data.accessKey,
+			password: device_data.password
+		});
+
+		// Create a timeout for when connection fails
+		var timeout = setTimeout(function () {
+			callback(true, null);
+		}, 10000);
 
 		// Establish connection to client
-		device.data.client.connect().then(function () {
+		client.connect().then(function () {
+			return [client.status(), client.pressure()];
+		}).spread(function (status) {
 
-			// Construct device
-			var device = {
-				name: "Nefit Easy",
-				data: {
-					id: device.data.serialNumber,
-					client: device.data.client
-				}
-			};
+			// And store temp setpoint
+			client.target_temperature = status['temp setpoint'];
+
+			// And store in house temp
+			client.measure_temperature = status['in house temp'];
+
+			// Clear error callback
+			clearTimeout(timeout);
 
 			// Return device
-			callback(null, device);
+			callback(null, client);
+		}).catch(function () {
+			callback(true, false);
 		});
 	}
 	else {
@@ -194,14 +298,101 @@ function reconnectClient(device_id, callback) {
 }
 
 /**
+ * Add or update client on internal client list
+ * @param client
+ * @param callback
+ */
+function addOrUpdateClient(client) {
+
+	// Check if valid client
+	if (client && client.opts && client.opts.serialNumber && client.opts.accessKey) {
+
+		// Try to find client
+		var client_index = -1;
+		for (var x = 0; x < clients.length; x++) {
+			if (clients[x].opts.serialNumber === client.opts.serialNumber && clients[x].opts.accessKey === client.opts.accessKey) {
+				client_index = x;
+			}
+		}
+
+		// If already present
+		if (client_index > -1) {
+
+			// First find and delete device
+			clients.splice(client_index, 1);
+
+			// Than update it
+			clients.push(client);
+		}
+		else {
+			// Add it
+			clients.push(client);
+		}
+	}
+}
+
+/**
+ * Nefit Easy doesn't support realtime, therefore we have to poll
+ * for changes considering the measured and target temperature
+ */
+function startPolling() {
+
+	// Poll every 30 seconds
+	setInterval(function () {
+
+		// Loop over all devices
+		for (var i = 0; i < clients.length; i++) {
+			var client = clients[i];
+
+			// Get toon object
+			if (client) {
+
+				// Connect client and retrieve status
+				client.connect().then(function () {
+					return [client.status(), client.pressure()];
+				}).spread(function (status) {
+
+					// Device could be reached, mark as available in case it was unavailable
+					module.exports.setAvailable({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')});
+
+					// If updated temperature is not equal to prev temperature
+					if (client.target_temperature && status['temp setpoint'] != client.target_temperature) {
+
+						// Do a realtime update
+						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "target_temperature", status['temp setpoint']);
+					}
+
+					// And store updated value
+					client.target_temperature = status['temp setpoint'];
+
+					// If updated temperature is not equal to prev temperature
+					if (client.measure_temperature && status['in house temp'] != client.measure_temperature) {
+
+						// Do a realtime update
+						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "measure_temperature", status['in house temp']);
+					}
+
+					// And store updated value
+					client.measure_temperature = status['in house temp'];
+				}).catch(function () {
+
+					// Could not create client to connect to device
+					module.exports.setUnavailable({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, __("not_reachable"));
+				});
+			}
+		}
+	}, 1000 * 60);
+};
+
+/**
  * Gets a device based on an id
  * @param device_id
  * @returns {*}
  */
-function getDevice(device_id) {
-	for (var x = 0; x < devices.length; x++) {
-		if (devices[x].data.id === device_id) {
-			return devices[x];
+function getClient(serialNumber, accessKey) {
+	for (var x = 0; x < clients.length; x++) {
+		if (clients[x].opts.serialNumber === serialNumber && clients[x].opts.accessKey === accessKey) {
+			return clients[x];
 		}
 	}
 };
