@@ -11,6 +11,9 @@ module.exports.init = function (devices_data, callback) {
 	// Loop over all installed devices and re-establish clients
 	for (var x = 0; x < devices_data.length; x++) {
 
+		// Make sure devices shows reconnecting message while unavailable
+		module.exports.setUnavailable({id: devices_data[x].id}, __("reconnecting"));
+
 		// Wrap createClient function to keep the variables in scope
 		function wrapperFunction(device_data) {
 
@@ -106,6 +109,7 @@ module.exports.capabilities = {
 
 			// Get client
 			var client = getClient(device_data.serialNumber, device_data.accessKey);
+
 			if (client) {
 
 				// Check if data already present
@@ -126,8 +130,11 @@ module.exports.capabilities = {
 						// Clear error callback
 						clearTimeout(timeout);
 
+						// Update device data
+						client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 2) / 2;
+
 						// Return received value
-						callback(null, status['temp setpoint']);
+						callback(null, Math.round(status['temp setpoint'].toFixed(1) * 2) / 2);
 
 					}).catch(function () {
 
@@ -160,6 +167,16 @@ module.exports.capabilities = {
 
 					// Set temperature
 					client.setTemperature(Math.round(temperature.toFixed(1) * 2) / 2);
+
+					// Emit when user changes target temperature
+					if (client.target_temperature != Math.round(temperature.toFixed(1) * 2) / 2) {
+
+						// Emit event
+						module.exports.realtime(device_data, 'target_temperature', Math.round(temperature.toFixed(1) * 2) / 2);
+
+						// Update device data
+						client.target_temperature = Math.round(temperature.toFixed(1) * 2) / 2;
+					}
 
 					// Clear error callback
 					clearTimeout(timeout);
@@ -209,8 +226,11 @@ module.exports.capabilities = {
 						// Clear error callback
 						clearTimeout(timeout);
 
+						// Update device data
+						client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 2) / 2;
+
 						// Return received value
-						callback(null, status['in house temp']);
+						callback(null, Math.round(status['in house temp'].toFixed(1) * 2) / 2);
 
 					}).catch(function () {
 
@@ -278,10 +298,10 @@ function createClient(device_data, callback) {
 		}).spread(function (status) {
 
 			// And store temp setpoint
-			client.target_temperature = status['temp setpoint'];
+			client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 2) / 2;
 
 			// And store in house temp
-			client.measure_temperature = status['in house temp'];
+			client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 2) / 2;
 
 			// Clear error callback
 			clearTimeout(timeout);
@@ -325,6 +345,7 @@ function addOrUpdateClient(client) {
 			clients.push(client);
 		}
 		else {
+
 			// Add it
 			clients.push(client);
 		}
@@ -356,24 +377,24 @@ function startPolling() {
 					module.exports.setAvailable({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')});
 
 					// If updated temperature is not equal to prev temperature
-					if (client.target_temperature && status['temp setpoint'] != client.target_temperature) {
+					if (client.target_temperature && (Math.round(status['temp setpoint'].toFixed(1) * 2) / 2) != client.target_temperature) {
 
 						// Do a realtime update
-						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "target_temperature", status['temp setpoint']);
+						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "target_temperature", Math.round(status['temp setpoint'].toFixed(1) * 2) / 2);
 					}
 
 					// And store updated value
-					client.target_temperature = status['temp setpoint'];
+					client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 2) / 2;
 
 					// If updated temperature is not equal to prev temperature
-					if (client.measure_temperature && status['in house temp'] != client.measure_temperature) {
+					if (client.measure_temperature && (Math.round(status['in house temp'].toFixed(1) * 2) / 2) != client.measure_temperature) {
 
 						// Do a realtime update
-						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "measure_temperature", status['in house temp']);
+						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "measure_temperature", Math.round(status['in house temp'].toFixed(1) * 2) / 2);
 					}
 
 					// And store updated value
-					client.measure_temperature = status['in house temp'];
+					client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 2) / 2;
 				}).catch(function () {
 
 					// Could not create client to connect to device
