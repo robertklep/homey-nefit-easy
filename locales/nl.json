@@ -1,7 +1,8 @@
 {
   "pair": {
     "setup_intro": "Om Homey met je Nefit Easy te laten samenwerken hebben we wat meer informatie nodig.",
-    "setup_failed": "Homey kon je Nefit Easy niet vinden, of dit apparaat is al toegevoegd, controleer of de informatie hieronder klopt en probeer het opnieuw.",
+    "setup_failed": "Homey kon je Nefit Easy niet vinden, of dit apparaat is al toegevoegd, controleer of de gegevens hieronder kloppen en probeer het opnieuw.",
+    "setup_failed_hint": "Hint: mocht je de gegevens niet meer herinneren, kijk op de voorkant van je Nefit Easy handleiding.",
     "setup_succeeded": "Je kunt nu je Nefit Easy bedienen met Homey!",
     "settings": "Instellingen",
     "serialnumber": "Serienummer",

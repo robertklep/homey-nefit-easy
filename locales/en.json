@@ -2,6 +2,7 @@
   "pair": {
     "setup_intro": "To let Homey talk with your Nefit Easy we need some more information.",
     "setup_failed": "Homey couldn't find your Nefit Easy, or this device is already added, please make sure the entered credentials are correct and try again.",
+    "setup_failed_hint": "Hint: if you don't remember your credentials, check the front cover of your Nefit Easy manual.",
     "setup_succeeded": "Your Nefit Easy was successfully added!",
     "settings": "Settings",
     "serialnumber": "Serial number",
