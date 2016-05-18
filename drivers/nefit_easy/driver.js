@@ -67,6 +67,8 @@ module.exports.pair = function (socket) {
 
 		// Establish connection to client
 		client.connect().then(function () {
+			return [client.status(), client.pressure()];
+		}).spread(function () {
 
 			// Clear error callback
 			clearTimeout(timeout);
