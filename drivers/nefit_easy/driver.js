@@ -12,7 +12,7 @@ module.exports.init = function (devices_data, callback) {
 	for (var x = 0; x < devices_data.length; x++) {
 
 		// Make sure devices shows reconnecting message while unavailable
-		module.exports.setUnavailable({id: devices_data[x].id}, __("reconnecting"));
+		module.exports.setUnavailable(devices_data[x], __("reconnecting"));
 
 		// Wrap createClient function to keep the variables in scope
 		function wrapperFunction(device_data) {
@@ -25,12 +25,12 @@ module.exports.init = function (devices_data, callback) {
 					addOrUpdateClient(client);
 
 					// Mark as available
-					module.exports.setAvailable({id: device_data.id});
+					module.exports.setAvailable(device_data);
 				}
 				else {
 
 					// Could not create client to connect to device
-					module.exports.setUnavailable({id: device_data.id}, __("not_reachable"));
+					module.exports.setUnavailable(device_data, __("not_reachable"));
 				}
 			});
 		}
@@ -370,19 +370,26 @@ function startPolling() {
 			// Get toon object
 			if (client) {
 
+				var device_data = {
+					id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64'),
+					serialNumber: client.opts.serialNumber,
+					accessKey: client.opts.accessKey,
+					password: client.opts.password
+				};
+
 				// Connect client and retrieve status
 				client.connect().then(function () {
 					return [client.status(), client.pressure()];
 				}).spread(function (status) {
 
 					// Device could be reached, mark as available in case it was unavailable
-					module.exports.setAvailable({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')});
+					module.exports.setAvailable(device_data);
 
 					// If updated temperature is not equal to prev temperature
 					if (client.target_temperature && (Math.round(status['temp setpoint'].toFixed(1) * 2) / 2) != client.target_temperature) {
 
 						// Do a realtime update
-						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "target_temperature", Math.round(status['temp setpoint'].toFixed(1) * 2) / 2);
+						module.exports.realtime(device_data, "target_temperature", Math.round(status['temp setpoint'].toFixed(1) * 2) / 2);
 					}
 
 					// And store updated value
@@ -392,7 +399,7 @@ function startPolling() {
 					if (client.measure_temperature && (Math.round(status['in house temp'].toFixed(1) * 2) / 2) != client.measure_temperature) {
 
 						// Do a realtime update
-						module.exports.realtime({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, "measure_temperature", Math.round(status['in house temp'].toFixed(1) * 2) / 2);
+						module.exports.realtime(device_data, "measure_temperature", Math.round(status['in house temp'].toFixed(1) * 2) / 2);
 					}
 
 					// And store updated value
@@ -400,7 +407,7 @@ function startPolling() {
 				}).catch(function () {
 
 					// Could not create client to connect to device
-					module.exports.setUnavailable({id: new Buffer(client.opts.serialNumber + client.opts.accessKey).toString('base64')}, __("not_reachable"));
+					module.exports.setUnavailable(device_data, __("not_reachable"));
 				});
 			}
 		}
