@@ -133,10 +133,10 @@ module.exports.capabilities = {
 						clearTimeout(timeout);
 
 						// Update device data
-						client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 2) / 2;
+						client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 10) / 10;
 
 						// Return received value
-						callback(null, Math.round(status['temp setpoint'].toFixed(1) * 2) / 2);
+						callback(null, Math.round(status['temp setpoint'].toFixed(1) * 10) / 10);
 
 					}).catch(function () {
 
@@ -168,16 +168,16 @@ module.exports.capabilities = {
 				client.connect().then(function () {
 
 					// Set temperature
-					client.setTemperature(Math.round(temperature.toFixed(1) * 2) / 2);
+					client.setTemperature(Math.round(temperature.toFixed(1) * 10) / 10);
 
 					// Emit when user changes target temperature
-					if (client.target_temperature != Math.round(temperature.toFixed(1) * 2) / 2) {
+					if (client.target_temperature != Math.round(temperature.toFixed(1) * 10) / 10) {
 
 						// Emit event
-						module.exports.realtime(device_data, 'target_temperature', Math.round(temperature.toFixed(1) * 2) / 2);
+						module.exports.realtime(device_data, 'target_temperature', Math.round(temperature.toFixed(1) * 10) / 10);
 
 						// Update device data
-						client.target_temperature = Math.round(temperature.toFixed(1) * 2) / 2;
+						client.target_temperature = Math.round(temperature.toFixed(1) * 10) / 10;
 					}
 
 					// Clear error callback
@@ -229,10 +229,10 @@ module.exports.capabilities = {
 						clearTimeout(timeout);
 
 						// Update device data
-						client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 2) / 2;
+						client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 10) / 10;
 
 						// Return received value
-						callback(null, Math.round(status['in house temp'].toFixed(1) * 2) / 2);
+						callback(null, Math.round(status['in house temp'].toFixed(1) * 10) / 10);
 
 					}).catch(function () {
 
@@ -300,10 +300,10 @@ function createClient(device_data, callback) {
 		}).spread(function (status) {
 
 			// And store temp setpoint
-			client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 2) / 2;
+			client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 10) / 10;
 
 			// And store in house temp
-			client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 2) / 2;
+			client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 10) / 10;
 
 			// Clear error callback
 			clearTimeout(timeout);
@@ -386,24 +386,24 @@ function startPolling() {
 					module.exports.setAvailable(device_data);
 
 					// If updated temperature is not equal to prev temperature
-					if (client.target_temperature && (Math.round(status['temp setpoint'].toFixed(1) * 2) / 2) != client.target_temperature) {
+					if (client.target_temperature && (Math.round(status['temp setpoint'].toFixed(1) * 10) / 10) != client.target_temperature) {
 
 						// Do a realtime update
-						module.exports.realtime(device_data, "target_temperature", Math.round(status['temp setpoint'].toFixed(1) * 2) / 2);
+						module.exports.realtime(device_data, "target_temperature", Math.round(status['temp setpoint'].toFixed(1) * 10) / 10);
 					}
 
 					// And store updated value
-					client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 2) / 2;
+					client.target_temperature = Math.round(status['temp setpoint'].toFixed(1) * 10) / 10;
 
 					// If updated temperature is not equal to prev temperature
-					if (client.measure_temperature && (Math.round(status['in house temp'].toFixed(1) * 2) / 2) != client.measure_temperature) {
+					if (client.measure_temperature && (Math.round(status['in house temp'].toFixed(1) * 10) / 10) != client.measure_temperature) {
 
 						// Do a realtime update
-						module.exports.realtime(device_data, "measure_temperature", Math.round(status['in house temp'].toFixed(1) * 2) / 2);
+						module.exports.realtime(device_data, "measure_temperature", Math.round(status['in house temp'].toFixed(1) * 10) / 10);
 					}
 
 					// And store updated value
-					client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 2) / 2;
+					client.measure_temperature = Math.round(status['in house temp'].toFixed(1) * 10) / 10;
 				}).catch(function () {
 
 					// Could not create client to connect to device
