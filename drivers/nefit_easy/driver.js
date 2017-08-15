@@ -60,6 +60,11 @@ module.exports.pair = function (socket) {
 			password: settings.password
 		});
 
+		// Listen for uncaught exceptions
+		client.on('error', function(err) {
+			console.error('NefitEasyClient uncaught error', err);
+		});
+
 		// Create a timeout for when connection fails
 		var timeout = setTimeout(function () {
 			callback(true, null);
@@ -287,6 +292,11 @@ function createClient(device_data, callback) {
 			serialNumber: device_data.serialNumber,
 			accessKey: device_data.accessKey,
 			password: device_data.password
+		});
+
+		// Listen for uncaught exceptions
+		client.on('error', function(err) {
+			console.error('NefitEasyClient uncaught error', err);
 		});
 
 		// Create a timeout for when connection fails

@@ -5,7 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "homey-log": "https://github.com/athombv/node-homey-log",
-    "nefit-easy-commands": "^1.5.0"
+    "nefit-easy-commands": "^1.8.0"
   },
   "devDependencies": {},
   "scripts": {
