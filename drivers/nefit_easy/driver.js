@@ -1,4 +1,10 @@
-var NefitEasyClient = require('nefit-easy-commands');
+const Homey           = require('homey');
+const NefitEasyClient = require('nefit-easy-commands');
+
+module.exports = class NefitEasyDriver extends Homey.Driver {
+};
+
+if (0) {
 
 // Keep a list of all clients
 var clients = [];
@@ -7,6 +13,7 @@ var clients = [];
  * When driver is started, make sure all clients are reconnected
  */
 module.exports.init = function (devices_data, callback) {
+  return callback(Error('foo'));
 
 	// Loop over all installed devices and re-establish clients
 	for (var x = 0; x < devices_data.length; x++) {
@@ -436,3 +443,5 @@ function getClient(serialNumber, accessKey) {
 		}
 	}
 };
+
+}
