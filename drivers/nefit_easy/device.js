@@ -1,9 +1,11 @@
+const DEBUG           = true;
 const Homey           = require('homey');
 const NefitEasyClient = require('nefit-easy-commands');
 const debounce        = require('debounce');
 
+const SYNC_INTERVAL     = DEBUG ? 10000 : 60000;
 const DEBOUNCE_RATE     = 500;
-const MEASURED          = 'measure_temperature';
+const MEASURED_INDOOR   = 'measure_temperature';
 const TARGET            = 'target_temperature';
 const formatTemperature = t => Math.round(t.toFixed(1) * 10) / 10
 
@@ -26,6 +28,10 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
     // Register capabilities.
     this.registerCapabilityListener(TARGET, debounce(this.onSetTargetTemperature, DEBOUNCE_RATE).bind(this));
+
+    // Start syncing periodically..
+    this.shouldSync = true;
+    this.startSyncing();
   }
 
   async instantiateClient() {
@@ -46,11 +52,12 @@ module.exports = class NefitEasyDevice extends Homey.Device {
   async updateStatus() {
     let status = this.status = await this.client.status();
 
-    this.setCapabilityValue(MEASURED, formatTemperature(status['in house temp']));
+    // Set measured temperatures.
+    await this.setCapabilityValue(MEASURED_INDOOR, formatTemperature(status['in house temp']));
 
     // Target temperature depends on the user mode: manual or program.
     let temp = Number(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ])
-    this.setCapabilityValue(TARGET, formatTemperature(temp));
+    await this.setCapabilityValue(TARGET, formatTemperature(temp));
   }
 
   onSetTargetTemperature(value, opts) {
@@ -62,9 +69,37 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     return this.client.setTemperature(value).then(s => {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
-        this.setCapabilityValue(TARGET, value);
+        return this.setCapabilityValue(TARGET, value);
       }
     });
+  }
+
+  async startSyncing() {
+    // Prevent more than one syncing cycle.
+    if (this.hasSyncingStarted) return;
+
+    // Start syncing.
+    this.hasSyncingStarted = true;
+    this.log('starting sync');
+    this.sync();
+  }
+
+  async sync() {
+    if (! this.shouldSync || this.isSyncing) return;
+
+    this.isSyncing = true;
+    this.log('updating status');
+    try {
+      await this.updateStatus();
+      await this.setAvailable();
+    } catch(e) {
+      this.log('error updating status', e.message);
+      await this.setUnavailable();
+    }
+    this.isSyncing = false;
+
+    // Schedule next sync.
+    this.timeout = setTimeout(() => this.sync(), SYNC_INTERVAL);
   }
 
   // this method is called when the Device is added
@@ -75,6 +110,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
   // this method is called when the Device is deleted
   onDeleted() {
     this.log('device deleted');
+    this.shouldPoll = false;
   }
 
 }
