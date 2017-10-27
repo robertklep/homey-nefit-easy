@@ -49,16 +49,19 @@
             "en": "Measured temperature",
             "nl": "Gemeten temperatuur"
           }
+        },
+        "measure_pressure": {
+          "title": {
+            "en": "Pressure",
+            "nl": "Druk"
+          }
         }
       },
-      "pair": [
-        {
-          "id": "nefit_setup"
-        },
-        {
-          "id": "add_nefit_easy"
-        }
-      ]
+      "pair": [{
+        "id": "start"
+      }, {
+        "id": "device-added"
+      }]
     }
   ],
   "flow": {}

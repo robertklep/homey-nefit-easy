@@ -1,13 +1,15 @@
 const DEBUG           = true;
 const Homey           = require('homey');
 const NefitEasyClient = require('nefit-easy-commands');
-const debounce        = require('debounce');
 
-const SYNC_INTERVAL     = DEBUG ? 10000 : 60000;
-const DEBOUNCE_RATE     = 500;
-const MEASURED_INDOOR   = 'measure_temperature';
-const TARGET            = 'target_temperature';
-const formatTemperature = t => Math.round(t.toFixed(1) * 10) / 10
+const SYNC_INTERVAL = DEBUG ? 10000 : 60000;
+const DEBOUNCE_RATE = 500;
+const formatValue   = t => Math.round(t.toFixed(1) * 10) / 10
+
+// Capabilities
+const INDOOR_TEMP = 'measure_temperature';
+const TARGET_TEMP = 'target_temperature';
+const PRESSURE    = 'measure_pressure';
 
 module.exports = class NefitEasyDevice extends Homey.Device {
 
@@ -17,7 +19,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
     // Instantiate client for this device.
     try {
-      await this.instantiateClient();
+      this.client = await this.instantiateClient(this.getData());
     } catch(e) {
       this.log(`unable to initialize device: ${ e.message }`);
       throw e;
@@ -27,41 +29,40 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     await this.setAvailable();
 
     // Register capabilities.
-    this.registerCapabilityListener(TARGET, debounce(this.onSetTargetTemperature, DEBOUNCE_RATE).bind(this));
+    this.registerMultipleCapabilityListener([ TARGET_TEMP ] , this.onSetTargetTemperature.bind(this), DEBOUNCE_RATE);
 
     // Start syncing periodically..
     this.shouldSync = true;
     this.startSyncing();
   }
 
-  async instantiateClient() {
-    const data  = this.getData();
-    this.client = NefitEasyClient({
+  async instantiateClient(data) {
+    let client = NefitEasyClient({
       serialNumber : data.serialNumber,
       accessKey    : data.accessKey,
       password     : data.password,
     });
-
-    await this.client.connect();
+    await client.connect();
     this.log('device connected successfully to backend');
-
-    // Update status.
-    return this.updateStatus();
+    return client;
   }
 
   async updateStatus() {
-    let status = this.status = await this.client.status();
+    let [ status, pressure ] = await Promise.all([ this.client.status(), this.client.pressure() ]);
 
-    // Set measured temperatures.
-    await this.setCapabilityValue(MEASURED_INDOOR, formatTemperature(status['in house temp']));
+    // Set measured temperature and pressure.
+    await this.setCapabilityValue(INDOOR_TEMP, formatValue(status['in house temp']));
+    if (this.hasCapability('measure_pressure') && pressure) {
+      await this.setCapabilityValue(PRESSURE, formatValue(pressure.pressure));
+    }
 
     // Target temperature depends on the user mode: manual or program.
     let temp = Number(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ])
-    await this.setCapabilityValue(TARGET, formatTemperature(temp));
+    await this.setCapabilityValue(TARGET_TEMP, formatValue(temp));
   }
 
   onSetTargetTemperature(value, opts) {
-    if (this.getCapabilityValue(TARGET) === value) {
+    if (this.getCapabilityValue(TARGET_TEMP) === value) {
       this.log('value matches current, not updating', value);
       return Promise.resolve();
     }
@@ -69,7 +70,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     return this.client.setTemperature(value).then(s => {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
-        return this.setCapabilityValue(TARGET, value);
+        return this.setCapabilityValue(TARGET_TEMP, value);
       }
     });
   }
@@ -104,13 +105,16 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
   // this method is called when the Device is added
   onAdded() {
-    this.log('device added');
+    this.log('new device added', this.getName(), this.getData().serialNumber);
   }
 
   // this method is called when the Device is deleted
   onDeleted() {
-    this.log('device deleted');
-    this.shouldPoll = false;
+    this.log('device deleted', this.getName(), this.getData().serialNumber);
+    if (this.client) {
+      this.client.end();
+    }
+    this.shouldSync = false;
   }
 
 }

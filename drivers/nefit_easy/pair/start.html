@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/manager/webserver/assets/css/font.awesome.css">
+    <script type="text/javascript" src="/manager/webserver/assets/js/jquery.js"></script>
+    <style type="text/css">
+      .nefit-input {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        height: 40px;
+        box-sizing: border-box;
+        padding: 0 10px 0 10px;
+        font-size: 14px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        transition: all .3s;
+        margin-bottom: 3px;
+        font-family: "Roboto";
+        font-weight: 300;
+      }
+
+      .error {
+        border: 1px solid;
+        border-radius: 3px;
+        margin: 10px 0px;
+        padding: 15px 10px 15px 15px;
+        background-repeat: no-repeat;
+        background-position: 10px center;
+        color: #D8000C;
+        background-color: #FFBABA;
+      }
+
+      .center-div {
+        position: absolute;
+        margin: auto;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100px;
+        height: 100px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="nefit_content">
+      <p data-i18n="pair.setup_intro"></p>
+
+      <div id="errorText" class="error" style="display:none;">
+        <p style="padding-bottom:0;" data-i18n="pair.setup_failed"></p>
+        <p style="padding-bottom:0; margin-top: 6px; font-style: italic;" data-i18n="pair.setup_failed_hint"></p>
+      </div>
+
+      <input id="serial" class="nefit-input" type="text" name="serialnumber"><br>
+      <input id="access" class="nefit-input" type="text" name="accesskey"><br>
+      <input id="password" class="nefit-input" type="password" name="password"><br>
+
+      <button id="submitButton" type="submit" class="button" style="margin-top:3px;" data-i18n="pair.add"></button>
+    </div>
+    <div id="nefit_loading" class="center-div" style="display:none;">
+      <div class="fa fa-cog fa-spin fa-5x"></div>
+    </div>
+
+    <script type="text/javascript">
+      Homey.setTitle(__('pair.setup'));
+
+      // Catch enter click to submit form
+      $(document).keypress(function (e) {
+        if (e.keyCode == 13) {
+          $('#submitButton').click();
+        }
+      });
+
+      // Set placeholders
+      document.getElementById("serial").setAttribute("placeholder", __("pair.serialnumber"));
+      document.getElementById("access").setAttribute("placeholder", __("pair.accesskey"));
+      document.getElementById("password").setAttribute("placeholder", __("pair.password"));
+
+      // Settings done, save device
+      $('#submitButton').on('click', () => {
+        // Show loading icon
+        $("#nefit_content").hide();
+        $("#nefit_loading").show();
+
+        // Check if device is valid in the backend
+        Homey.emit("validate_device", {
+          serialNumber : document.getElementById("serial").value,
+          accessKey    : document.getElementById("access").value,
+          password     : document.getElementById("password").value
+        }, function (err, device) {
+
+          // Check for valid input
+          if (!err && device) {
+            // Add device to homey
+            Homey.addDevice(device, function (err, result) {
+              if (err) {
+
+                // Show error
+                $("#errorText").show();
+
+                // Show content
+                $("#nefit_content").show();
+                $("#nefit_loading").hide();
+              } else {
+
+                // Add device on the backend.
+                Homey.emit("add_device", device);
+
+                // Success.
+                Homey.showView("device-added");
+              }
+            });
+          } else {
+            // Show error
+            $("#errorText").show();
+
+            // Show content
+            $("#nefit_content").show();
+            $("#nefit_loading").hide();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
