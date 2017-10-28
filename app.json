@@ -21,6 +21,49 @@
   },
   "permissions": [],
   "speech": [],
+  "capabilities": {
+    "clock_programme": {
+      "type": "boolean",
+      "title": {
+        "en": "Clock Programme",
+        "nl": "Klokprogramma"
+      },
+      "getable": true,
+      "setable": true
+    },
+    "operating_mode": {
+      "type": "enum",
+      "title": {
+        "en": "Operating Mode",
+        "nl": "Bedrijfsmodus"
+      },
+      "values": [
+        {
+          "id": "hot_water",
+          "title": {
+            "en": "Hot Water",
+            "nl": "Warmwater"
+          }
+        },
+        {
+          "id": "central_heating",
+          "title": {
+            "en": "Central Heating",
+            "nl": "CV"
+          }
+        },
+        {
+          "id": "off",
+          "title": {
+            "en": "Off",
+            "nl": "Uit"
+          }
+        }
+      ],
+      "getable": true,
+      "setable": false
+    }
+  },
   "drivers": [
     {
       "id": "nefit_easy",
@@ -35,7 +78,9 @@
       "class": "thermostat",
       "capabilities": [
         "target_temperature",
-        "measure_temperature"
+        "measure_temperature",
+        "clock_programme",
+        "operating_mode"
       ],
       "capabilitiesOptions": {
         "target_temperature": {
@@ -55,13 +100,51 @@
             "en": "Pressure",
             "nl": "Druk"
           }
+        },
+        "clock_programme": {
+          "title": {
+            "en": "Clock Programme",
+            "nl": "Klokprogramma"
+          }
+        },
+        "operating_mode": {
+          "title": {
+            "en": "Operating Mode",
+            "nl": "Bedrijfsmodus"
+          }
         }
       },
-      "pair": [{
-        "id": "start"
-      }, {
-        "id": "device-added"
-      }]
+      "mobile": {
+        "components": [
+          {
+            "id": "icon",
+            "capabilities": [
+              "clock_programme"
+            ]
+          },
+          {
+            "id": "sensor",
+            "capabilities": [
+              "measure_temperature",
+              "measure_pressure"
+            ]
+          },
+          {
+            "id": "thermostat",
+            "capabilities": [
+              "target_temperature"
+            ]
+          }
+        ]
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "device-added"
+        }
+      ]
     }
   ],
   "flow": {}
