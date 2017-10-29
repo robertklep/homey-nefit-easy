@@ -39,14 +39,14 @@
       },
       "values": [
         {
-          "id": "hot_water",
+          "id": "hot water",
           "title": {
             "en": "Hot Water",
             "nl": "Warmwater"
           }
         },
         {
-          "id": "central_heating",
+          "id": "central heating",
           "title": {
             "en": "Central Heating",
             "nl": "CV"
@@ -67,6 +67,7 @@
   "drivers": [
     {
       "id": "nefit_easy",
+      "class": "thermostat",
       "name": {
         "en": "Nefit Easy",
         "nl": "Nefit Easy"
@@ -75,7 +76,6 @@
         "large": "drivers/nefit_easy/assets/images/large.png",
         "small": "drivers/nefit_easy/assets/images/small.png"
       },
-      "class": "thermostat",
       "capabilities": [
         "target_temperature",
         "measure_temperature",
@@ -117,10 +117,7 @@
       "mobile": {
         "components": [
           {
-            "id": "icon",
-            "capabilities": [
-              "clock_programme"
-            ]
+            "id": "icon"
           },
           {
             "id": "sensor",
@@ -143,6 +140,73 @@
         },
         {
           "id": "device-added"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Synchronization",
+            "en": "Synchronisatie"
+          },
+          "children": [
+            {
+              "id": "syncInterval",
+              "type": "number",
+              "label": {
+                "en": "Interval",
+                "nl": "Interval"
+              },
+              "value": 60,
+              "attr": {
+                "min": 30,
+                "max": 600
+              },
+              "hint": {
+                "en": "How often, in seconds, should Homey ask the Nefit Easy for a status update?",
+                "nl": "Hoe vaak, in seconden, moet Homey de Nefit Easy voor een status update vragen?"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Authenticatie"
+          },
+          "children": [
+            {
+              "id": "serialNumber",
+              "type": "label",
+              "value": "",
+              "label": {
+                "en": "Serial Number",
+                "nl": "Serienummer"
+              }
+            },
+            {
+              "id": "accessKey",
+              "type": "label",
+              "value": "",
+              "label": {
+                "en": "Access Key",
+                "nl": "Toegangscode"
+              }
+            },
+            {
+              "id": "password",
+              "type": "password",
+              "value" : "",
+              "label": {
+                "en": "Password",
+                "nl": "Wachtwoord"
+              },
+              "hint": {
+                "en": "Use this only when the password for your Nefit Easy has changed.",
+                "nl": "Gebruik dit alleen als het wachtwoord van je Nefit Easy veranderd is."
+              }
+            }
+          ]
         }
       ]
     }

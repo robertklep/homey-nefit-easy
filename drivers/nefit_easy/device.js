@@ -1,8 +1,6 @@
-const DEBUG           = true;
 const Homey           = require('homey');
 const NefitEasyClient = require('nefit-easy-commands');
 
-const SYNC_INTERVAL = DEBUG ? 10000 : 60000;
 const DEBOUNCE_RATE = 500;
 const formatValue   = t => Math.round(t.toFixed(1) * 10) / 10
 
@@ -16,12 +14,13 @@ const OPERATING_MODE  = 'operating_mode';
 module.exports = class NefitEasyDevice extends Homey.Device {
 
   async onInit() {
-    this.log(`device init, name = ${ this.getName() }, class = ${ this.getClass() }, serial = ${ this.getData().serialNumber }`);
-    await this.setUnavailable();
+    this.settings = await this.updateSettings();
+    this.log(`device init, name = ${ this.getName() }, class = ${ this.getClass() }, serial = ${ this.settings.serialNumber }`);
 
     // Instantiate client for this device.
+    await this.setUnavailable();
     try {
-      this.client = await this.instantiateClient(this.getData());
+      this.client = await this.instantiateClient(this.settings);
     } catch(e) {
       this.log(`unable to initialize device: ${ e.message }`);
       throw e;
@@ -39,11 +38,27 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.startSyncing();
   }
 
-  async instantiateClient(data) {
+  // Merge data (from pairing) with settings.
+  async updateSettings() {
+    let merged   = Object.assign({}, this.getData());
+    let settings = this.getSettings();
+    Object.keys(settings).forEach(key => {
+      if (settings[key]) {
+        merged[key] = settings[key];
+      }
+    });
+
+    // Merge back into settings.
+    let x = await this.setSettings(merged);
+    this.log('X', x);
+    return merged;
+  }
+
+  async instantiateClient(settings) {
     let client = NefitEasyClient({
-      serialNumber : data.serialNumber,
-      accessKey    : data.accessKey,
-      password     : data.password,
+      serialNumber : settings.serialNumber,
+      accessKey    : settings.accessKey,
+      password     : settings.password,
     });
     await client.connect();
     this.log('device connected successfully to backend');
@@ -135,21 +150,29 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.isSyncing = false;
 
     // Schedule next sync.
-    this.timeout = setTimeout(() => this.sync(), SYNC_INTERVAL);
+    let iv = this.settings.syncInterval;
+    this.timeout = setTimeout(() => this.sync(), iv === 42 ? 10000 : iv * 1000);
   }
 
   // this method is called when the Device is added
-  onAdded() {
-    this.log('new device added', this.getName(), this.getData().serialNumber);
+  async onAdded() {
+    this.log('new device added: ', this.getName(), this.settings.serialNumber);
   }
 
   // this method is called when the Device is deleted
-  onDeleted() {
-    this.log('device deleted', this.getName(), this.getData().serialNumber);
-    if (this.client) {
-      this.client.end();
-    }
+  async onDeleted() {
+    this.log('device deleted', this.getName(), this.settings.serialNumber);
+    this.client  && this.client.end();
+    this.timeout && clearTimeout(this.timeout);
     this.shouldSync = false;
+    this.setUnavailable();
+  }
+
+  onSettings(oldSettings, newSettings, changes, callback) {
+    // TODO: if password has changed, validate client.
+    this.settings = Object.assign({}, newSettings);
+    this.log('settings updated:', this.settings);
+    return callback(null, true);
   }
 
 }
