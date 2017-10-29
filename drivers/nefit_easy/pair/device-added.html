@@ -1,20 +1,17 @@
 <!doctype html>
 <html>
-<head>
-    <link rel="stylesheet" href="/manager/webserver/assets/css/font.awesome.css">
-    <script type="text/javascript" src="/manager/webserver/assets/js/jquery.js"></script>
-</head>
-<body>
-<div style="margin: 0 auto; width: 250px; margin-top: 8%;">
-    <img style="width:250px" src="../assets/icon.svg">
-</div>
-<div style="margin-top: 15px; text-align: center;">
-    <p data-i18n="pair.setup_succeeded"></p>
-</div>
-
-</body>
+  <head>
+    <title></title>
+  </head>
+  <body>
+    <div style="margin: 0 auto; width: 250px; margin-top: 8%;">
+      <img style="width:250px" src="../assets/icon.svg">
+    </div>
+    <div style="margin-top: 15px; text-align: center;">
+      <p data-i18n="pair.setup_succeeded"></p>
+    </div>
+    <script>
+      Homey.setTitle(__('pair.done'));
+    </script>
+  </body>
 </html>
-
-<script type="text/javascript">
-    Homey.setTitle(__('pair.done'));
-</script>

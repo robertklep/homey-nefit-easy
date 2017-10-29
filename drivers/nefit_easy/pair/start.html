@@ -1,10 +1,9 @@
 <!doctype html>
 <html>
   <head>
-    <link rel="stylesheet" href="/manager/webserver/assets/css/font.awesome.css">
-    <script type="text/javascript" src="/manager/webserver/assets/js/jquery.js"></script>
-    <style type="text/css">
-      .nefit-input {
+    <script src="./vue.min.js"></script>
+    <style>
+      #content input {
         width: 100%;
         border: 1px solid #ddd;
         border-radius: 3px;
@@ -44,83 +43,69 @@
     </style>
   </head>
   <body>
-    <div id="nefit_content">
-      <p data-i18n="pair.setup_intro"></p>
+    <div id="app">
+      <div id="content" v-show="! isLoading">
+        <p data-i18n="pair.setup_intro"></p>
 
-      <div id="errorText" class="error" style="display:none;">
-        <p style="padding-bottom:0;" data-i18n="pair.setup_failed"></p>
-        <p style="padding-bottom:0; margin-top: 6px; font-style: italic;" data-i18n="pair.setup_failed_hint"></p>
+        <div id="errorText" class="error" v-show="isError">
+          <p style="padding-bottom:0;" data-i18n="pair.setup_failed"></p>
+          <p style="padding-bottom:0; margin-top: 6px; font-style: italic;" data-i18n="pair.setup_failed_hint"></p>
+        </div>
+
+        <input @keyup="validateInput" v-model.trim="serialNumber" :placeholder="__('pair.serialnumber')" type="text"><br>
+        <input @keyup="validateInput" v-model.trim="accessKey"    :placeholder="__('pair.accesskey')"    type="text"><br>
+        <input @keyup="validateInput" v-model.trim="password"     :placeholder="__('pair.password')"     type="password"><br>
+
+        <button @click="submitDevice" v-bind:disabled="!isValidInput" id="submitButton" type="submit" class="button" style="margin-top:3px;" data-i18n="pair.add"></button>
       </div>
-
-      <input id="serial" class="nefit-input" type="text" name="serialnumber"><br>
-      <input id="access" class="nefit-input" type="text" name="accesskey"><br>
-      <input id="password" class="nefit-input" type="password" name="password"><br>
-
-      <button id="submitButton" type="submit" class="button" style="margin-top:3px;" data-i18n="pair.add"></button>
+      <div id="loading" v-show="isLoading" class="center-div">
+        <div class="fa fa-cog fa-spin fa-5x"></div>
+      </div>
     </div>
-    <div id="nefit_loading" class="center-div" style="display:none;">
-      <div class="fa fa-cog fa-spin fa-5x"></div>
-    </div>
-
-    <script type="text/javascript">
+    <script>
       Homey.setTitle(__('pair.setup'));
-
-      // Catch enter click to submit form
-      $(document).keypress(function (e) {
-        if (e.keyCode == 13) {
-          $('#submitButton').click();
-        }
-      });
-
-      // Set placeholders
-      document.getElementById("serial").setAttribute("placeholder", __("pair.serialnumber"));
-      document.getElementById("access").setAttribute("placeholder", __("pair.accesskey"));
-      document.getElementById("password").setAttribute("placeholder", __("pair.password"));
-
-      // Settings done, save device
-      $('#submitButton').on('click', () => {
-        // Show loading icon
-        $("#nefit_content").hide();
-        $("#nefit_loading").show();
-
-        // Check if device is valid in the backend
-        Homey.emit("validate_device", {
-          serialNumber : document.getElementById("serial").value,
-          accessKey    : document.getElementById("access").value,
-          password     : document.getElementById("password").value
-        }, function (err, device) {
-
-          // Check for valid input
-          if (!err && device) {
-            // Add device to homey
-            Homey.addDevice(device, function (err, result) {
-              if (err) {
-
-                // Show error
-                $("#errorText").show();
-
-                // Show content
-                $("#nefit_content").show();
-                $("#nefit_loading").hide();
-              } else {
-
-                // Add device on the backend.
-                Homey.emit("add_device", device);
-
-                // Success.
-                Homey.showView("device-added");
+      new Vue({
+        el   : '#app',
+        data : {
+          isError      : false,
+          isValidInput : false,
+          isLoading    : false,
+          serialNumber : '',
+          accessKey    : '',
+          password     : '',
+        },
+        methods : {
+          submitDevice() {
+            this.isLoading = true;
+            Homey.emit('validate_device', {
+              serialNumber : this.serialNumber,
+              accessKey    : this.accessKey,
+              password     : this.password,
+            }, (err, device) => {
+              this.isLoading = false;
+              if (err || ! device) {
+                console.error('validation error', err || 'no device returned from backend');
+                this.isError = true;
+                return;
               }
+              this.isLoading = true;
+              Homey.addDevice(device, function (err, result) {
+                this.isLoading = false;
+                if (err) {
+                  console.error('error adding device', err);
+                  this.isError = true;
+                  return;
+                }
+                // Success.
+                Homey.showView('device-added');
+              });
             });
-          } else {
-            // Show error
-            $("#errorText").show();
-
-            // Show content
-            $("#nefit_content").show();
-            $("#nefit_loading").hide();
+          },
+          validateInput() {
+            this.isValidInput = this.serialNumber.length && this.accessKey.length && this.password.length;
           }
-        });
-      });
+        }
+      })
     </script>
   </body>
 </html>
