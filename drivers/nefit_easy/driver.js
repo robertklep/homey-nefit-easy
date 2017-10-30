@@ -9,11 +9,11 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
   }
 
   async validateDevice(data, callback) {
-    this.log('validating new device');
+    this.log('validating new device', data);
     // Check and see if we can connect to the backend with the supplied credentials.
     let client;
     try {
-      client = await Device.prototype.instantiateClient.call(this, data);
+      client = await Device.prototype.getClient.call(this, data);
     } catch(e) {
       this.log('unable to instantiate client:', e.message);
       return callback(e);
@@ -35,10 +35,9 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
     try {
       let pressure = await client.pressure();
       if (pressure) {
-        capabilities.push('measure_pressure');
+        capabilities.push('system_pressure');
       }
     } catch(e) {
-      client.end();
       // This happens when the Nefit Easy client wasn't able to decode the
       // response from the Nefit backend, which means that the password wasn't
       // correct.
@@ -47,11 +46,10 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
         return callback(Error('credentials'));
       }
       return callback(e);
+    } finally {
+      client.end();
     }
     this.log('supported capabilities:', capabilities);
-
-    // Close connection
-    client.end();
 
     // Everything checks out.
     callback(null, { name : 'Nefit Easy', data, capabilities });

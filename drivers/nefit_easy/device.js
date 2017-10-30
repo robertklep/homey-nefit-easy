@@ -7,9 +7,13 @@ const formatValue   = t => Math.round(t.toFixed(1) * 10) / 10
 // Capabilities
 const INDOOR_TEMP     = 'measure_temperature';
 const TARGET_TEMP     = 'target_temperature';
-const PRESSURE        = 'measure_pressure';
+const PRESSURE        = 'system_pressure';
 const CLOCK_PROGRAMME = 'clock_programme';
 const OPERATING_MODE  = 'operating_mode';
+
+process.on('unhandledRejection', r => {
+  console.log(r.stack);
+});
 
 module.exports = class NefitEasyDevice extends Homey.Device {
 
@@ -20,7 +24,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     // Instantiate client for this device.
     await this.setUnavailable();
     try {
-      this.client = await this.instantiateClient(this.settings);
+      this.client = await this.getClient(this.settings);
     } catch(e) {
       this.log(`unable to initialize device: ${ e.message }`);
       throw e;
@@ -50,11 +54,10 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
     // Merge back into settings.
     let x = await this.setSettings(merged);
-    this.log('X', x);
     return merged;
   }
 
-  async instantiateClient(settings) {
+  async getClient(settings) {
     let client = NefitEasyClient({
       serialNumber : settings.serialNumber,
       accessKey    : settings.accessKey,
@@ -91,7 +94,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     }
 
     // Set pressure, if the device supports it.
-    if (this.hasCapability('measure_pressure') && pressure) {
+    if (this.hasCapability('system_pressure') && pressure) {
       await this.setValue(PRESSURE, pressure.pressure);
     }
   }
@@ -156,7 +159,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
   // this method is called when the Device is added
   async onAdded() {
-    this.log('new device added: ', this.getName(), this.settings.serialNumber);
+    this.log('new device added: ', this.getName(), this.getData().serialNumber);
   }
 
   // this method is called when the Device is deleted
@@ -168,10 +171,21 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.setUnavailable();
   }
 
-  onSettings(oldSettings, newSettings, changes, callback) {
-    // TODO: if password has changed, validate client.
+  async onSettings(oldSettings, newSettings, changes, callback) {
+    // If password has changed, validate client.
+    if (changes.includes('password')) {
+      let client;
+      try {
+        client = await this.getClient(newSettings);
+        await client.status();
+      } catch(e) {
+        this.log('unable to validate password change');
+        return callback(Homey.__('settings.password'));
+      } finally {
+        client && client.end();
+      }
+    }
     this.settings = Object.assign({}, newSettings);
-    this.log('settings updated:', this.settings);
     return callback(null, true);
   }
 

@@ -22,6 +22,25 @@
   "permissions": [],
   "speech": [],
   "capabilities": {
+    "system_pressure": {
+      "type": "number",
+      "units" : {
+        "en" : "bar",
+        "nl" : "bar"
+      },
+      "title": {
+        "en": "Pressure",
+        "nl": "Druk"
+      },
+      "desc" : {
+        "en": "System pressure in bar",
+        "nl": "Systeemdruk in bar"
+      },
+      "getable": true,
+      "setable": false,
+      "chartType" : "spline",
+      "decimals" : 1
+    },
     "clock_programme": {
       "type": "boolean",
       "title": {
@@ -95,7 +114,7 @@
             "nl": "Gemeten temperatuur"
           }
         },
-        "measure_pressure": {
+        "system_pressure": {
           "title": {
             "en": "Pressure",
             "nl": "Druk"
@@ -123,8 +142,13 @@
             "id": "sensor",
             "capabilities": [
               "measure_temperature",
-              "measure_pressure"
-            ]
+              "system_pressure"
+            ],
+            "options" : {
+              "icons" : {
+                "system_pressure" : "assets/system_pressure.svg"
+              }
+            }
           },
           {
             "id": "thermostat",

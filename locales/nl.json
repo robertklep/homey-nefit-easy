@@ -13,5 +13,8 @@
     "done": "Nefit Easy toegevoegd"
   },
   "not_reachable": "Het apparaat kon niet worden bereikt",
-  "reconnecting": "Bezig met verbinden"
+  "reconnecting": "Bezig met verbinden",
+  "settings" : {
+    "password" : "Kan nieuw wachtwoord niet valideren"
+  }
 }
