@@ -99,12 +99,23 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     }
   }
 
-  onSetTargetTemperature(value, opts) {
+  async onSetTargetTemperature(data, opts) {
+    let value = data[TARGET_TEMP];
     this.log('setting target temperature to', value);
-    if (this.getCapabilityValue(TARGET_TEMP) === value) {
+
+    // Retrieve current target temperature from backend.
+    let status = await this.client.status();
+    let currentValue = formatValue(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ]);
+
+    if (currentValue === value) {
       this.log('value matches current, not updating', value);
-      return Promise.resolve();
+      // Check if capability value matches.
+      if (this.getCapabilityValue(TARGET_TEMP) !== value) {
+        await this.setValue(TARGET_TEMP, value);
+      }
+      return true;
     }
+
     return this.client.setTemperature(value).then(s => {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
@@ -113,13 +124,23 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     });
   }
 
-  onSetClockProgramme(value, opts) {
-    value = value[CLOCK_PROGRAMME];
+  async onSetClockProgramme(data, opts) {
+    let value = data[CLOCK_PROGRAMME];
     this.log('setting programme mode to', value ? 'clock' : 'manual');
-    if (this.getCapabilityValue(CLOCK_PROGRAMME) === value) {
+
+    // Retrieve current status from backend.
+    let status = await this.client.status();
+    let currentValue = status['user mode'] === 'clock';
+
+    if (currentValue === value) {
       this.log('value matches current, not updating');
-      return Promise.resolve();
+      // Check if capability value matches.
+      if (this.getCapabilityValue(CLOCK_PROGRAMME) !== value) {
+        await this.setValue(CLOCK_PROGRAMME, value);
+      }
+      return true;
     }
+
     return this.client.setUserMode(value ? 'clock' : 'manual').then(s => {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
