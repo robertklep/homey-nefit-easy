@@ -1,8 +1,27 @@
 const Homey           = require('homey');
 const NefitEasyClient = require('nefit-easy-commands');
 const Device          = require('./device');
+const Capabilities    = require('./capabilities');
 
 module.exports = class NefitEasyDriver extends Homey.Driver {
+
+  onInit() {
+    // Register flow cards.
+    this.registerFlowCards();
+  }
+
+  registerFlowCards() {
+    this._triggers = {
+      [ Capabilities.OPERATING_MODE ] : new Homey.FlowCardTriggerDevice('operating_mode_changed').register(),
+      [ Capabilities.PRESSURE ]       : new Homey.FlowCardTriggerDevice('system_pressure_changed').register(),
+    }
+
+    this._conditions = {
+      operating_mode_matches : new Homey.FlowCardCondition('operating_mode_matches').register().registerRunListener(( args, state ) => {
+        return Promise.resolve(args.mode === state[ Capabilities.OPERATING_MODE ]);
+      })
+    }
+  }
 
   onPair(socket) {
     socket.on('validate_device', this.validateDevice.bind(this));

@@ -1,15 +1,9 @@
 const Homey           = require('homey');
 const NefitEasyClient = require('nefit-easy-commands');
+const Capabilities    = require('./capabilities');
 
 const DEBOUNCE_RATE = 500;
 const formatValue   = t => Math.round(t.toFixed(1) * 10) / 10
-
-// Capabilities
-const INDOOR_TEMP     = 'measure_temperature';
-const TARGET_TEMP     = 'target_temperature';
-const PRESSURE        = 'system_pressure';
-const CLOCK_PROGRAMME = 'clock_programme';
-const OPERATING_MODE  = 'operating_mode';
 
 process.on('unhandledRejection', r => {
   console.log(r.stack);
@@ -34,12 +28,26 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     await this.setAvailable();
 
     // Register capabilities.
-    this.registerMultipleCapabilityListener([ TARGET_TEMP ],     this.onSetTargetTemperature.bind(this), DEBOUNCE_RATE);
-    this.registerMultipleCapabilityListener([ CLOCK_PROGRAMME ], this.onSetClockProgramme   .bind(this), DEBOUNCE_RATE);
+    this.registerCapabilities()
 
-    // Start syncing periodically..
+    // Get driver.
+    this.driver = await this._getDriver();
+
+    // Start syncing periodically.
     this.shouldSync = true;
     this.startSyncing();
+  }
+
+  async _getDriver() {
+    return new Promise(resolve => {
+      let driver = this.getDriver();
+      driver.ready(() => resolve(driver));
+    });
+  }
+
+  registerCapabilities() {
+    this.registerMultipleCapabilityListener([ Capabilities.TARGET_TEMP ],     this.onSetTargetTemperature.bind(this), DEBOUNCE_RATE);
+    this.registerMultipleCapabilityListener([ Capabilities.CLOCK_PROGRAMME ], this.onSetClockProgramme   .bind(this), DEBOUNCE_RATE);
   }
 
   // Merge data (from pairing) with settings.
@@ -74,7 +82,14 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       value = formatValue(value);
     }
     if (this.getCapabilityValue(cap) !== value) {
-      return await this.setCapabilityValue(cap, value);
+      await this.setCapabilityValue(cap, value);
+      // Trigger?
+      /*
+      if (cap in this.driver._triggers) {
+        this.log('triggering for', cap);
+        await this.driver._triggers[cap].trigger(this, { [ cap ] : value });
+      }
+      */
     }
   }
 
@@ -86,21 +101,21 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       // Target temperature depends on the user mode: manual or program.
       let temp = Number(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ])
       await Promise.all([
-        this.setValue(CLOCK_PROGRAMME, status['user mode'] === 'clock'),
-        this.setValue(OPERATING_MODE,  status['boiler indicator']),
-        this.setValue(INDOOR_TEMP,     status['in house temp']),
-        this.setValue(TARGET_TEMP,     temp)
+        this.setValue(Capabilities.CLOCK_PROGRAMME, status['user mode'] === 'clock'),
+        this.setValue(Capabilities.OPERATING_MODE,  status['boiler indicator']),
+        this.setValue(Capabilities.INDOOR_TEMP,     status['in house temp']),
+        this.setValue(Capabilities.TARGET_TEMP,     temp)
       ]);
     }
 
     // Set pressure, if the device supports it.
     if (this.hasCapability('system_pressure') && pressure) {
-      await this.setValue(PRESSURE, pressure.pressure);
+      await this.setValue(Capabilities.PRESSURE, pressure.pressure);
     }
   }
 
   async onSetTargetTemperature(data, opts) {
-    let value = data[TARGET_TEMP];
+    let value = data[Capabilities.TARGET_TEMP];
     this.log('setting target temperature to', value);
 
     // Retrieve current target temperature from backend.
@@ -110,8 +125,8 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     if (currentValue === value) {
       this.log('value matches current, not updating', value);
       // Check if capability value matches.
-      if (this.getCapabilityValue(TARGET_TEMP) !== value) {
-        await this.setValue(TARGET_TEMP, value);
+      if (this.getCapabilityValue(Capabilities.TARGET_TEMP) !== value) {
+        await this.setValue(Capabilities.TARGET_TEMP, value);
       }
       return true;
     }
@@ -119,13 +134,13 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     return this.client.setTemperature(value).then(s => {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
-        return this.setValue(TARGET_TEMP, value);
+        return this.setValue(Capabilities.TARGET_TEMP, value);
       }
     });
   }
 
   async onSetClockProgramme(data, opts) {
-    let value = data[CLOCK_PROGRAMME];
+    let value = data[Capabilities.CLOCK_PROGRAMME];
     this.log('setting programme mode to', value ? 'clock' : 'manual');
 
     // Retrieve current status from backend.
@@ -135,8 +150,8 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     if (currentValue === value) {
       this.log('value matches current, not updating');
       // Check if capability value matches.
-      if (this.getCapabilityValue(CLOCK_PROGRAMME) !== value) {
-        await this.setValue(CLOCK_PROGRAMME, value);
+      if (this.getCapabilityValue(Capabilities.CLOCK_PROGRAMME) !== value) {
+        await this.setValue(Capabilities.CLOCK_PROGRAMME, value);
       }
       return true;
     }
@@ -144,7 +159,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     return this.client.setUserMode(value ? 'clock' : 'manual').then(s => {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
-        return this.setValue(CLOCK_PROGRAMME, value);
+        return this.setValue(Capabilities.CLOCK_PROGRAMME, value);
       }
     });
   }
@@ -168,7 +183,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       await this.updateStatus();
       await this.setAvailable();
     } catch(e) {
-      this.log('error updating status', e.message);
+      this.log('error updating status', e);
       await this.setUnavailable();
     }
     this.isSyncing = false;

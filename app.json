@@ -235,5 +235,104 @@
       ]
     }
   ],
-  "flow": {}
+  "flow": {
+    "triggers" : [
+      {
+        "id" : "operating_mode_changed",
+        "title" : {
+          "en" : "Operating mode changed",
+          "nl" : "Bedrijfsmodus is veranderd"
+        },
+        "args" : [
+          {
+            "name" : "device",
+            "type" : "device",
+            "filter" : "driver_id=nefit_easy"
+          }
+        ],
+        "tokens" : [
+          {
+            "name" : "operating_mode",
+            "type" : "string",
+            "title" : {
+              "en" : "Mode",
+              "nl" : "Modus"
+            },
+            "example" : {
+              "en" : "Hot Water",
+              "nl" : "Warmwater"
+            }
+          }
+        ]
+      },
+      {
+        "id" : "system_pressure_changed",
+        "title" : {
+          "en" : "System pressure changed",
+          "nl" : "Systeemdruk is veranderd"
+        },
+        "args" : [
+          {
+            "name" : "device",
+            "type" : "device",
+            "filter" : "driver_id=nefit_easy"
+          }
+        ],
+        "tokens" : [
+          {
+            "name" : "system_pressure",
+            "type" : "number",
+            "title" : {
+              "en" : "Druk",
+              "nl" : "Druk"
+            },
+            "example" : 1.8
+          }
+        ]
+      }
+    ],
+    "conditions" : [
+      {
+        "id" : "operating_mode_matches",
+        "title" : {
+          "en" : "Operating mode !{{matches|doesn't match}}:",
+          "nl" : "Bedrijfsmodus !{{is|is niet}}:"
+        },
+        "args" : [
+          {
+            "name" : "device",
+            "type" : "device",
+            "filter" : "driver_id=nefit_easy"
+          },
+          {
+            "name" : "mode",
+            "type" : "dropdown",
+            "values" : [
+              {
+                "id": "hot water",
+                "label": {
+                  "en": "Hot Water",
+                  "nl": "Warmwater"
+                }
+              },
+              {
+                "id": "central heating",
+                "label": {
+                  "en": "Central Heating",
+                  "nl": "CV"
+                }
+              },
+              {
+                "id": "off",
+                "label": {
+                  "en": "Off",
+                  "nl": "Uit"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 }
