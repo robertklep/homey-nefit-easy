@@ -5,6 +5,7 @@ const Capabilities    = require('./capabilities');
 const DEBOUNCE_RATE = 500;
 const formatValue   = t => Math.round(t.toFixed(1) * 10) / 10
 
+// Log stack for unhandled rejections.
 process.on('unhandledRejection', r => {
   console.log(r.stack);
 });
@@ -13,7 +14,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
   async onInit() {
     this.settings = await this.updateSettings();
-    this.log(`device init, name = ${ this.getName() }, class = ${ this.getClass() }, serial = ${ this.settings.serialNumber }, supports pressure = ${ this.settings.supportsPressure }`);
+    this.log(`Device init: name = ${ this.getName() }, serial = ${ this.settings.serialNumber }, supports pressure = ${ this.settings.supportsPressure }`);
 
     // Instantiate client for this device.
     await this.setUnavailable(Homey.__('device.connecting'));
@@ -38,18 +39,6 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.startSyncing();
   }
 
-  async _getDriver() {
-    return new Promise(resolve => {
-      let driver = this.getDriver();
-      driver.ready(() => resolve(driver));
-    });
-  }
-
-  registerCapabilities() {
-    this.registerMultipleCapabilityListener([ Capabilities.TARGET_TEMP ],     this.onSetTargetTemperature.bind(this), DEBOUNCE_RATE);
-    this.registerMultipleCapabilityListener([ Capabilities.CLOCK_PROGRAMME ], this.onSetClockProgramme   .bind(this), DEBOUNCE_RATE);
-  }
-
   // Merge data (from pairing) with settings.
   async updateSettings() {
     let merged   = Object.assign({}, this.getData());
@@ -61,10 +50,17 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     });
 
     // Merge back into settings.
-    let x = await this.setSettings(merged);
+    await this.setSettings(merged);
     return merged;
   }
 
+  // Register setters for capabilities.
+  registerCapabilities() {
+    this.registerMultipleCapabilityListener([ Capabilities.TARGET_TEMP ],     this.onSetTargetTemperature.bind(this), DEBOUNCE_RATE);
+    this.registerMultipleCapabilityListener([ Capabilities.CLOCK_PROGRAMME ], this.onSetClockProgramme   .bind(this), DEBOUNCE_RATE);
+  }
+
+  // Get a (connected) instance of the Nefit Easy client.
   async getClient(settings) {
     let client = NefitEasyClient({
       serialNumber : settings.serialNumber,
@@ -76,6 +72,15 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     return client;
   }
 
+  // Get a (ready) instance of the driver.
+  async _getDriver() {
+    return new Promise(resolve => {
+      let driver = this.getDriver();
+      driver.ready(() => resolve(driver));
+    });
+  }
+
+  // Set a capability value, optionally formatting it.
   async setValue(cap, value) {
     if (value == null) return;
     if (typeof value === 'number') {
@@ -83,16 +88,11 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     }
     if (this.getCapabilityValue(cap) !== value) {
       await this.setCapabilityValue(cap, value);
-      // Trigger?
-      /*
-      if (cap in this.driver._triggers) {
-        this.log('triggering for', cap);
-        await this.driver._triggers[cap].trigger(this, { [ cap ] : value });
-      }
-      */
     }
   }
 
+  // Update device status by querying the backend (which in
+  // turn proxies the requests to the Nefit Easy device).
   async updateStatus() {
     let [ status, pressure ] = await Promise.all([ this.client.status(), this.client.pressure() ]);
 
@@ -130,6 +130,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     }
   }
 
+  // Set target temperature on Nefit Easy device.
   async onSetTargetTemperature(data, opts) {
     let value = data[Capabilities.TARGET_TEMP];
     this.log('setting target temperature to', value);
@@ -155,6 +156,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     });
   }
 
+  // Enable/disable clock program.
   async onSetClockProgramme(data, opts) {
     let value = data[Capabilities.CLOCK_PROGRAMME];
     this.log('setting programme mode to', value ? 'clock' : 'manual');
@@ -197,7 +199,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.log('updating status');
     try {
       await this.updateStatus();
-      await this.setAvailable();
+      await this.setAvailable(); // We could update so the device is available.
     } catch(e) {
       this.log('error updating status', e);
       await this.setUnavailable(Homey.__('device.sync_error') + ': ' + e.message);
@@ -209,12 +211,12 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.timeout = setTimeout(() => this.sync(), iv === 42 ? 10000 : iv * 1000);
   }
 
-  // this method is called when the Device is added
+  // A new device was added.
   async onAdded() {
     this.log('new device added: ', this.getName(), this.getData().serialNumber);
   }
 
-  // this method is called when the Device is deleted
+  // A device was deleted.
   async onDeleted() {
     this.log('device deleted', this.getName(), this.settings.serialNumber);
     this.client  && this.client.end();
@@ -223,6 +225,8 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.setUnavailable();
   }
 
+  // Called when used changed settings, in which
+  // case we need to validate some stuff.
   async onSettings(oldSettings, newSettings, changes, callback) {
     // If password has changed, validate client.
     if (changes.includes('password')) {

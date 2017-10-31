@@ -12,10 +12,7 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
 
   registerFlowCards() {
     this._triggers = {
-      [ Capabilities.OPERATING_MODE ] : new Homey.FlowCardTriggerDevice('operating_mode_changed').register().registerRunListener((args, state) => {
-        this.log('OM UPDATE', args, state);
-        return Promise.resolve(true);
-      }),
+      [ Capabilities.OPERATING_MODE ] : new Homey.FlowCardTriggerDevice('operating_mode_changed').register(),
       [ Capabilities.PRESSURE ]       : new Homey.FlowCardTriggerDevice('system_pressure_changed').register(),
       [ Capabilities.ALARM_PRESSURE ] : new Homey.FlowCardTriggerDevice('alarm_pressure_active').register(),
     }

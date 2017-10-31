@@ -266,7 +266,8 @@
         {
           "type": "group",
           "label": {
-            "en": "Drukalarm"
+            "en": "Pressure Alarm",
+            "nl": "Drukalarm"
           },
           "children": [
             {
@@ -277,10 +278,10 @@
                 "en": "Lower limit (in bar)",
                 "nl": "Ondergrens (in bar)"
               },
-              "attr" : {
-                "min" : 0,
-                "max" : 10,
-                "step" : 0.1
+              "attr": {
+                "min": 0,
+                "max": 10,
+                "step": 0.1
               }
             },
             {
@@ -291,10 +292,10 @@
                 "en": "Upper limit (in bar)",
                 "nl": "Bovengrens (in bar)"
               },
-              "attr" : {
-                "min" : 0,
-                "max" : 10,
-                "step" : 0.1
+              "attr": {
+                "min": 0,
+                "max": 10,
+                "step": 0.1
               }
             }
           ]
@@ -302,7 +303,8 @@
         {
           "type": "group",
           "label": {
-            "en": "Authenticatie"
+            "en": "Authentication",
+            "nl": "Authenticatie"
           },
           "children": [
             {
@@ -389,7 +391,7 @@
             "name": "system_pressure",
             "type": "number",
             "title": {
-              "en": "Druk",
+              "en": "Pressure",
               "nl": "Druk"
             },
             "example": 1.8
@@ -414,7 +416,7 @@
             "name": "system_pressure",
             "type": "number",
             "title": {
-              "en": "Druk",
+              "en": "Pressure",
               "nl": "Druk"
             },
             "example": 1.8
@@ -426,8 +428,8 @@
       {
         "id": "operating_mode_matches",
         "title": {
-          "en": "Operating mode !{{matches|doesn't match}}:",
-          "nl": "Bedrijfsmodus !{{is|is niet}}:"
+          "en": "Operating mode !{{matches|doesn't match}}",
+          "nl": "Bedrijfsmodus !{{is|is niet}}"
         },
         "args": [
           {
