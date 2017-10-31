@@ -22,6 +22,21 @@
   "permissions": [],
   "speech": [],
   "capabilities": {
+    "outdoor_temperature": {
+      "type": "number",
+      "units" : {
+        "en" : "°C",
+        "nl" : "°C"
+      },
+      "title": {
+        "en": "Outdoor temperature",
+        "nl": "Temperatuur buiten"
+      },
+      "getable": true,
+      "setable": false,
+      "chartType" : "stepLine",
+      "decimals" : 1
+    },
     "system_pressure": {
       "type": "number",
       "units" : {
@@ -38,7 +53,7 @@
       },
       "getable": true,
       "setable": false,
-      "chartType" : "spline",
+      "chartType" : "stepLine",
       "decimals" : 1
     },
     "clock_programme": {
@@ -81,6 +96,15 @@
       ],
       "getable": true,
       "setable": false
+    },
+    "central_heating": {
+      "type": "boolean",
+      "title": {
+        "en": "Central Heating",
+        "nl": "Verwarming"
+      },
+      "getable": true,
+      "setable": true
     }
   },
   "drivers": [
@@ -98,8 +122,10 @@
       "capabilities": [
         "target_temperature",
         "measure_temperature",
+        "outdoor_temperature",
         "clock_programme",
-        "operating_mode"
+        "operating_mode",
+        "central_heating"
       ],
       "capabilitiesOptions": {
         "target_temperature": {
@@ -110,8 +136,8 @@
         },
         "measure_temperature": {
           "title": {
-            "en": "Measured temperature",
-            "nl": "Gemeten temperatuur"
+            "en": "Temperature",
+            "nl": "Temperatuur"
           }
         },
         "system_pressure": {
@@ -131,6 +157,12 @@
             "en": "Operating Mode",
             "nl": "Bedrijfsmodus"
           }
+        },
+        "central_heating": {
+          "title": {
+            "en": "Central Heating",
+            "nl": "Verwarming"
+          }
         }
       },
       "mobile": {
@@ -142,11 +174,22 @@
             "id": "sensor",
             "capabilities": [
               "measure_temperature",
+              "outdoor_temperature",
+              "central_heating",
               "system_pressure"
             ],
             "options" : {
               "icons" : {
-                "system_pressure" : "assets/system_pressure.svg"
+                "measure_temperature" : "assets/mobile/005-temperature.svg",
+                "system_pressure" : "assets/mobile/006-dashboard.svg",
+                "outdoor_temperature" : "assets/mobile/003-house.svg",
+                "central_heating" : "assets/mobile/004-radiator.svg"
+              },
+              "central_heating" : {
+                "label" : {
+                  "true" :  { "en" : "On", "nl" : "Aan" },
+                  "false" : { "en" : "Off", "nl" : "Uit" }
+                }
               }
             }
           },

@@ -100,16 +100,20 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     if (status) {
       // Target temperature depends on the user mode: manual or program.
       let temp = Number(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ])
+      this.log('updating all status');
       await Promise.all([
         this.setValue(Capabilities.CLOCK_PROGRAMME, status['user mode'] === 'clock'),
         this.setValue(Capabilities.OPERATING_MODE,  status['boiler indicator']),
+        this.setValue(Capabilities.CENTRAL_HEATING, status['boiler indicator'] === 'central heating'),
         this.setValue(Capabilities.INDOOR_TEMP,     status['in house temp']),
+        this.setValue(Capabilities.OUTDOOR_TEMP,    status['outdoor temp']),
         this.setValue(Capabilities.TARGET_TEMP,     temp)
       ]);
     }
 
     // Set pressure, if the device supports it.
-    if (this.hasCapability('system_pressure') && pressure) {
+    if (this.hasCapability('system_pressure') && pressure && pressure.unit === 'bar') {
+      this.log('updating pressure', pressure);
       await this.setValue(Capabilities.PRESSURE, pressure.pressure);
     }
   }
