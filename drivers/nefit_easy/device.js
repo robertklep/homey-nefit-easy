@@ -16,7 +16,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     this.log(`device init, name = ${ this.getName() }, class = ${ this.getClass() }, serial = ${ this.settings.serialNumber }, supports pressure = ${ this.settings.supportsPressure }`);
 
     // Instantiate client for this device.
-    await this.setUnavailable();
+    await this.setUnavailable(Homey.__('device.connecting'));
     try {
       this.client = await this.getClient(this.settings);
     } catch(e) {
@@ -200,7 +200,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       await this.setAvailable();
     } catch(e) {
       this.log('error updating status', e);
-      await this.setUnavailable();
+      await this.setUnavailable(Homey.__('device.sync_error') + ': ' + e.message);
     }
     this.isSyncing = false;
 
