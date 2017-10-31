@@ -13,7 +13,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
   async onInit() {
     this.settings = await this.updateSettings();
-    this.log(`device init, name = ${ this.getName() }, class = ${ this.getClass() }, serial = ${ this.settings.serialNumber }`);
+    this.log(`device init, name = ${ this.getName() }, class = ${ this.getClass() }, serial = ${ this.settings.serialNumber }, supports pressure = ${ this.settings.supportsPressure }`);
 
     // Instantiate client for this device.
     await this.setUnavailable();
@@ -96,7 +96,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
   async updateStatus() {
     let [ status, pressure ] = await Promise.all([ this.client.status(), this.client.pressure() ]);
 
-    // Set modes and temperatures.
+    // Update modes and temperatures.
     if (status) {
       // Target temperature depends on the user mode: manual or program.
       let temp = Number(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ])
@@ -111,9 +111,9 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       ]);
     }
 
-    // Set pressure, if the device supports it.
-    if (this.hasCapability('system_pressure') && pressure && pressure.unit === 'bar') {
-      this.log('updating pressure', pressure);
+    // Update pressure.
+    if (pressure && pressure.unit === 'bar') {
+      this.log('updating pressure', pressure, this.settings.supportsPressure ? '' : '(even though device was paired without pressure support?)');
       let value       = pressure.pressure;
       let alarmActive = value < this.settings.pressureTooLow || value > this.settings.pressureTooHigh;
 

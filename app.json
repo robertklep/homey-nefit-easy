@@ -139,6 +139,7 @@
         "clock_programme",
         "operating_mode",
         "central_heating",
+        "system_pressure",
         "alarm_pressure"
       ],
       "capabilitiesOptions": {

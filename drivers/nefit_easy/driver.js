@@ -12,7 +12,10 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
 
   registerFlowCards() {
     this._triggers = {
-      [ Capabilities.OPERATING_MODE ] : new Homey.FlowCardTriggerDevice('operating_mode_changed').register(),
+      [ Capabilities.OPERATING_MODE ] : new Homey.FlowCardTriggerDevice('operating_mode_changed').register().registerRunListener((args, state) => {
+        this.log('OM UPDATE', args, state);
+        return Promise.resolve(true);
+      }),
       [ Capabilities.PRESSURE ]       : new Homey.FlowCardTriggerDevice('system_pressure_changed').register(),
       [ Capabilities.ALARM_PRESSURE ] : new Homey.FlowCardTriggerDevice('alarm_pressure_active').register(),
     }
@@ -47,16 +50,10 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
       return callback(Error('duplicate'));
     }
 
-    // Load default supported capabilities for the device
-    // from the app manifest.
-    let capabilities = require('../../app.json').drivers[0].capabilities;
-
     // Retrieve pressure to see if the device supports it.
     try {
       let pressure = await client.pressure();
-      if (pressure) {
-        capabilities.push('system_pressure');
-      }
+      data.supportsPressure = !! pressure;
     } catch(e) {
       // This happens when the Nefit Easy client wasn't able to decode the
       // response from the Nefit backend, which means that the password wasn't
@@ -69,10 +66,9 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
     } finally {
       client.end();
     }
-    this.log('supported capabilities:', capabilities);
 
     // Everything checks out.
-    callback(null, { name : 'Nefit Easy', data, capabilities });
+    callback(null, { name : 'Nefit Easy', data });
   }
 
 }
