@@ -114,7 +114,19 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     // Set pressure, if the device supports it.
     if (this.hasCapability('system_pressure') && pressure && pressure.unit === 'bar') {
       this.log('updating pressure', pressure);
-      await this.setValue(Capabilities.PRESSURE, pressure.pressure);
+      let value       = pressure.pressure;
+      let alarmActive = value < this.settings.pressureTooLow || value > this.settings.pressureTooHigh;
+
+      // If the pressure alarm should be active, but it isn't yet, trigger the flow card.
+      if (alarmActive && ! this.getCapabilityValue(Capabilities.ALARM_PRESSURE)) {
+        this.log(`activating pressure alarm (lower limit = ${ this.settings.pressureTooLow }, upper limit = ${ this.settings.pressureTooHigh})`);
+        this.driver._triggers[Capabilities.ALARM_PRESSURE].trigger(this, { [ Capabilities.PRESSURE ] : value });
+      }
+
+      await Promise.all([
+        this.setValue(Capabilities.PRESSURE, value),
+        this.setValue(Capabilities.ALARM_PRESSURE, alarmActive)
+      ]);
     }
   }
 

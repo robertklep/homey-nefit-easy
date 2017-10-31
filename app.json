@@ -24,9 +24,9 @@
   "capabilities": {
     "outdoor_temperature": {
       "type": "number",
-      "units" : {
-        "en" : "°C",
-        "nl" : "°C"
+      "units": {
+        "en": "°C",
+        "nl": "°C"
       },
       "title": {
         "en": "Outdoor temperature",
@@ -34,27 +34,40 @@
       },
       "getable": true,
       "setable": false,
-      "chartType" : "stepLine",
-      "decimals" : 1
+      "chartType": "stepLine",
+      "decimals": 1
     },
     "system_pressure": {
       "type": "number",
-      "units" : {
-        "en" : "bar",
-        "nl" : "bar"
+      "units": {
+        "en": "bar",
+        "nl": "bar"
       },
       "title": {
         "en": "Pressure",
         "nl": "Druk"
       },
-      "desc" : {
+      "desc": {
         "en": "System pressure in bar",
         "nl": "Systeemdruk in bar"
       },
       "getable": true,
       "setable": false,
-      "chartType" : "stepLine",
-      "decimals" : 1
+      "chartType": "stepLine",
+      "decimals": 1
+    },
+    "alarm_pressure": {
+      "type": "boolean",
+      "title": {
+        "en": "Pressure Alarm",
+        "nl": "Drukalarm"
+      },
+      "desc": {
+        "en": "System pressure is too low/high",
+        "nl": "Systeemdruk is te laag/hoog"
+      },
+      "getable": true,
+      "setable": false
     },
     "clock_programme": {
       "type": "boolean",
@@ -125,7 +138,8 @@
         "outdoor_temperature",
         "clock_programme",
         "operating_mode",
-        "central_heating"
+        "central_heating",
+        "alarm_pressure"
       ],
       "capabilitiesOptions": {
         "target_temperature": {
@@ -163,6 +177,12 @@
             "en": "Central Heating",
             "nl": "Verwarming"
           }
+        },
+        "alarm_pressure": {
+          "title": {
+            "en": "System pressure is too low/high",
+            "nl": "Systeemdruk is te laag/hoog"
+          }
         }
       },
       "mobile": {
@@ -178,17 +198,23 @@
               "central_heating",
               "system_pressure"
             ],
-            "options" : {
-              "icons" : {
-                "measure_temperature" : "assets/mobile/005-temperature.svg",
-                "system_pressure" : "assets/mobile/006-dashboard.svg",
-                "outdoor_temperature" : "assets/mobile/003-house.svg",
-                "central_heating" : "assets/mobile/004-radiator.svg"
+            "options": {
+              "icons": {
+                "measure_temperature": "assets/mobile/005-temperature.svg",
+                "system_pressure": "assets/mobile/006-dashboard.svg",
+                "outdoor_temperature": "assets/mobile/003-house.svg",
+                "central_heating": "assets/mobile/004-radiator.svg"
               },
-              "central_heating" : {
-                "label" : {
-                  "true" :  { "en" : "On", "nl" : "Aan" },
-                  "false" : { "en" : "Off", "nl" : "Uit" }
+              "central_heating": {
+                "label": {
+                  "true": {
+                    "en": "On",
+                    "nl": "Aan"
+                  },
+                  "false": {
+                    "en": "Off",
+                    "nl": "Uit"
+                  }
                 }
               }
             }
@@ -214,7 +240,7 @@
           "type": "group",
           "label": {
             "en": "Synchronization",
-            "en": "Synchronisatie"
+            "nl": "Synchronisatie"
           },
           "children": [
             {
@@ -232,6 +258,42 @@
               "hint": {
                 "en": "How often, in seconds, should Homey ask the Nefit Easy for a status update?",
                 "nl": "Hoe vaak, in seconden, moet Homey de Nefit Easy voor een status update vragen?"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Drukalarm"
+          },
+          "children": [
+            {
+              "id": "pressureTooLow",
+              "type": "number",
+              "value": 1.5,
+              "label": {
+                "en": "Lower limit (in bar)",
+                "nl": "Ondergrens (in bar)"
+              },
+              "attr" : {
+                "min" : 0,
+                "max" : 10,
+                "step" : 0.1
+              }
+            },
+            {
+              "id": "pressureTooHigh",
+              "type": "number",
+              "value": 2.5,
+              "label": {
+                "en": "Upper limit (in bar)",
+                "nl": "Bovengrens (in bar)"
+              },
+              "attr" : {
+                "min" : 0,
+                "max" : 10,
+                "step" : 0.1
               }
             }
           ]
@@ -263,7 +325,7 @@
             {
               "id": "password",
               "type": "password",
-              "value" : "",
+              "value": "",
               "label": {
                 "en": "Password",
                 "nl": "Wachtwoord"
@@ -279,78 +341,103 @@
     }
   ],
   "flow": {
-    "triggers" : [
+    "triggers": [
       {
-        "id" : "operating_mode_changed",
-        "title" : {
-          "en" : "Operating mode changed",
-          "nl" : "Bedrijfsmodus is veranderd"
+        "id": "operating_mode_changed",
+        "title": {
+          "en": "Operating mode changed",
+          "nl": "Bedrijfsmodus is veranderd"
         },
-        "args" : [
+        "args": [
           {
-            "name" : "device",
-            "type" : "device",
-            "filter" : "driver_id=nefit_easy"
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
           }
         ],
-        "tokens" : [
+        "tokens": [
           {
-            "name" : "operating_mode",
-            "type" : "string",
-            "title" : {
-              "en" : "Mode",
-              "nl" : "Modus"
+            "name": "operating_mode",
+            "type": "string",
+            "title": {
+              "en": "Mode",
+              "nl": "Modus"
             },
-            "example" : {
-              "en" : "Hot Water",
-              "nl" : "Warmwater"
+            "example": {
+              "en": "Hot Water",
+              "nl": "Warmwater"
             }
           }
         ]
       },
       {
-        "id" : "system_pressure_changed",
-        "title" : {
-          "en" : "System pressure changed",
-          "nl" : "Systeemdruk is veranderd"
+        "id": "system_pressure_changed",
+        "title": {
+          "en": "System pressure changed",
+          "nl": "Systeemdruk is veranderd"
         },
-        "args" : [
+        "args": [
           {
-            "name" : "device",
-            "type" : "device",
-            "filter" : "driver_id=nefit_easy"
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
           }
         ],
-        "tokens" : [
+        "tokens": [
           {
-            "name" : "system_pressure",
-            "type" : "number",
-            "title" : {
-              "en" : "Druk",
-              "nl" : "Druk"
+            "name": "system_pressure",
+            "type": "number",
+            "title": {
+              "en": "Druk",
+              "nl": "Druk"
             },
-            "example" : 1.8
+            "example": 1.8
+          }
+        ]
+      },
+      {
+        "id": "alarm_pressure_active",
+        "title": {
+          "en": "Pressure alarm activated",
+          "nl": "Drukalarm geactiveerd"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "system_pressure",
+            "type": "number",
+            "title": {
+              "en": "Druk",
+              "nl": "Druk"
+            },
+            "example": 1.8
           }
         ]
       }
     ],
-    "conditions" : [
+    "conditions": [
       {
-        "id" : "operating_mode_matches",
-        "title" : {
-          "en" : "Operating mode !{{matches|doesn't match}}:",
-          "nl" : "Bedrijfsmodus !{{is|is niet}}:"
+        "id": "operating_mode_matches",
+        "title": {
+          "en": "Operating mode !{{matches|doesn't match}}:",
+          "nl": "Bedrijfsmodus !{{is|is niet}}:"
         },
-        "args" : [
+        "args": [
           {
-            "name" : "device",
-            "type" : "device",
-            "filter" : "driver_id=nefit_easy"
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
           },
           {
-            "name" : "mode",
-            "type" : "dropdown",
-            "values" : [
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
               {
                 "id": "hot water",
                 "label": {

@@ -6,4 +6,5 @@ module.exports = {
   CLOCK_PROGRAMME : 'clock_programme',
   OPERATING_MODE  : 'operating_mode',
   CENTRAL_HEATING : 'central_heating',
+  ALARM_PRESSURE  : 'alarm_pressure',
 }
