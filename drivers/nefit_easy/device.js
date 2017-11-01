@@ -14,7 +14,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
   async onInit() {
     this.settings = await this.updateSettings();
-    this.log(`Device init: name = ${ this.getName() }, serial = ${ this.settings.serialNumber }, supports pressure = ${ this.settings.supportsPressure }`);
+    this.log(`device init: name = ${ this.getName() }, serial = ${ this.settings.serialNumber }, supports pressure = ${ this.settings.supportsPressure }`);
 
     // Instantiate client for this device.
     await this.setUnavailable(Homey.__('device.connecting'));
@@ -100,7 +100,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     if (status) {
       // Target temperature depends on the user mode: manual or program.
       let temp = Number(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ])
-      this.log('updating all status');
+      this.log('...updating status');
       await Promise.all([
         this.setValue(Capabilities.CLOCK_PROGRAMME, status['user mode'] === 'clock'),
         this.setValue(Capabilities.OPERATING_MODE,  status['boiler indicator']),
@@ -113,13 +113,13 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
     // Update pressure.
     if (pressure && pressure.unit === 'bar') {
-      this.log('updating pressure', pressure, this.settings.supportsPressure ? '' : '(even though device was paired without pressure support?)');
+      this.log('...updating pressure', pressure, this.settings.supportsPressure ? '' : '(even though device was paired without pressure support?)');
       let value       = pressure.pressure;
       let alarmActive = value < this.settings.pressureTooLow || value > this.settings.pressureTooHigh;
 
       // If the pressure alarm should be active, but it isn't yet, trigger the flow card.
       if (alarmActive && ! this.getCapabilityValue(Capabilities.ALARM_PRESSURE)) {
-        this.log(`activating pressure alarm (lower limit = ${ this.settings.pressureTooLow }, upper limit = ${ this.settings.pressureTooHigh})`);
+        this.log(`...activating pressure alarm (lower limit = ${ this.settings.pressureTooLow }, upper limit = ${ this.settings.pressureTooHigh})`);
         this.driver._triggers[Capabilities.ALARM_PRESSURE].trigger(this, { [ Capabilities.PRESSURE ] : value });
       }
 
@@ -140,7 +140,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     let currentValue = formatValue(status[ status['user mode'] === 'manual' ? 'temp manual setpoint' : 'temp setpoint' ]);
 
     if (currentValue === value) {
-      this.log('value matches current, not updating', value);
+      this.log('(value matches current, not updating)');
       // Check if capability value matches.
       if (this.getCapabilityValue(Capabilities.TARGET_TEMP) !== value) {
         await this.setValue(Capabilities.TARGET_TEMP, value);
@@ -166,7 +166,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     let currentValue = status['user mode'] === 'clock';
 
     if (currentValue === value) {
-      this.log('value matches current, not updating');
+      this.log('(value matches current, not updating)');
       // Check if capability value matches.
       if (this.getCapabilityValue(Capabilities.CLOCK_PROGRAMME) !== value) {
         await this.setValue(Capabilities.CLOCK_PROGRAMME, value);
@@ -196,19 +196,21 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     if (! this.shouldSync || this.isSyncing) return;
 
     this.isSyncing = true;
-    this.log('updating status');
+    this.log('syncing');
     try {
       await this.updateStatus();
       await this.setAvailable(); // We could update so the device is available.
     } catch(e) {
-      this.log('error updating status', e);
+      this.log('error syncing', e);
       await this.setUnavailable(Homey.__('device.sync_error') + ': ' + e.message);
     }
     this.isSyncing = false;
 
     // Schedule next sync.
-    let iv = this.settings.syncInterval;
-    this.timeout = setTimeout(() => this.sync(), iv === 42 ? 10000 : iv * 1000);
+    this.timeout = setTimeout(
+      () => this.sync(),
+      Homey.env.DEBUG ? 10000 : this.settings.syncInterval * 1000
+    );
   }
 
   // A new device was added.

@@ -14,7 +14,19 @@
   "author": {
     "name": "Athom B.V."
   },
+  "contributors" : {
+    "developers" : [
+      {
+        "name" : "Robert Klep",
+        "email" : "robert@klep.name"
+      }
+    ]
+  },
   "category": "climate",
+  "tags" : {
+    "en" : [ "thermostat", "nefit", "easy", "heating", "central heating" ],
+    "nl" : [ "thermostaat", "nefit", "easy", "verwarming", "centrale verwarming", "cv" ]
+  },
   "images": {
     "large": "assets/images/large.jpg",
     "small": "assets/images/small.jpg"
@@ -287,7 +299,7 @@
             {
               "id": "pressureTooHigh",
               "type": "number",
-              "value": 2.5,
+              "value": 2.8,
               "label": {
                 "en": "Upper limit (in bar)",
                 "nl": "Bovengrens (in bar)"
