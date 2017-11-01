@@ -201,10 +201,10 @@
             ],
             "options": {
               "icons": {
-                "measure_temperature": "assets/mobile/005-temperature.svg",
-                "system_pressure": "assets/mobile/006-dashboard.svg",
-                "outdoor_temperature": "assets/mobile/003-house.svg",
-                "central_heating": "assets/mobile/004-radiator.svg"
+                "measure_temperature": "assets/mobile/measure_temperature.svg",
+                "system_pressure": "assets/mobile/system_pressure.svg",
+                "outdoor_temperature": "assets/mobile/outdoor_temperature.svg",
+                "central_heating": "assets/mobile/central_heating.svg"
               },
               "central_heating": {
                 "label": {
