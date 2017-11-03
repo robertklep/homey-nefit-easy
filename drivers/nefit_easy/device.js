@@ -14,7 +14,14 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
   async onInit() {
     this.settings = await this.updateSettings();
-    this.log(`device init: name = ${ this.getName() }, serial = ${ this.settings.serialNumber }, supports pressure = ${ this.settings.supportsPressure }`);
+    this.log(`device init: name = ${ this.getName() }, serial = ${ this.settings.serialNumber }`);
+
+    // Capability sniffing to sniff out older SDKv1 devices.
+    if (! this.hasCapability(Capabilities.OPERATING_MODE)) {
+      this.log('device entry too old, needs to be re-added');
+      await this.setUnavailable(Homey.__('device.too_old'));
+      return;
+    }
 
     // Instantiate client for this device.
     await this.setUnavailable(Homey.__('device.connecting'));
@@ -113,7 +120,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
 
     // Update pressure.
     if (pressure && pressure.unit === 'bar') {
-      this.log('...updating pressure', pressure, this.settings.supportsPressure ? '' : '(even though device was paired without pressure support?)');
+      this.log('...updating pressure', pressure);
       let value       = pressure.pressure;
       let alarmActive = value < this.settings.pressureTooLow || value > this.settings.pressureTooHigh;
 

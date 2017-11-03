@@ -1,5 +1,6 @@
 {
   "device" : {
+    "too_old" : "This Homey device is too old to work with the current version of the app. Please remove it and add a new device.",
     "connecting" : "Connecting to backend",
     "sync_error" : "Error during sync"
   },

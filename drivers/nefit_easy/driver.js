@@ -47,10 +47,9 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
       return callback(Error('duplicate'));
     }
 
-    // Retrieve pressure to see if the device supports it.
+    // Retrieve status to see if we can successfully load data from backend.
     try {
-      let pressure = await client.pressure();
-      data.supportsPressure = !! pressure;
+      await client.status();
     } catch(e) {
       // This happens when the Nefit Easy client wasn't able to decode the
       // response from the Nefit backend, which means that the password wasn't
