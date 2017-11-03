@@ -34,21 +34,6 @@
   "permissions": [],
   "speech": [],
   "capabilities": {
-    "outdoor_temperature": {
-      "type": "number",
-      "units": {
-        "en": "°C",
-        "nl": "°C"
-      },
-      "title": {
-        "en": "Outdoor temperature",
-        "nl": "Temperatuur buiten"
-      },
-      "getable": true,
-      "setable": false,
-      "chartType": "stepLine",
-      "decimals": 1
-    },
     "system_pressure": {
       "type": "number",
       "units": {
@@ -146,8 +131,8 @@
       },
       "capabilities": [
         "target_temperature",
-        "measure_temperature",
-        "outdoor_temperature",
+        "measure_temperature.indoor",
+        "measure_temperature.outdoor",
         "clock_programme",
         "operating_mode",
         "central_heating",
@@ -161,10 +146,16 @@
             "nl": "Ingestelde temperatuur"
           }
         },
-        "measure_temperature": {
+        "measure_temperature.indoor": {
           "title": {
             "en": "Temperature",
             "nl": "Temperatuur"
+          }
+        },
+        "measure_temperature.outdoor": {
+          "title": {
+            "en": "Outdoor temperature",
+            "nl": "Temperatuur buiten"
           }
         },
         "system_pressure": {
@@ -206,16 +197,16 @@
           {
             "id": "sensor",
             "capabilities": [
-              "measure_temperature",
-              "outdoor_temperature",
+              "measure_temperature.indoor",
+              "measure_temperature.outdoor",
               "central_heating",
               "system_pressure"
             ],
             "options": {
               "icons": {
-                "measure_temperature": "assets/mobile/measure_temperature.svg",
+                "measure_temperature.indoor": "assets/mobile/measure_temperature.svg",
+                "measure_temperature.outdoor": "assets/mobile/outdoor_temperature.svg",
                 "system_pressure": "assets/mobile/system_pressure.svg",
-                "outdoor_temperature": "assets/mobile/outdoor_temperature.svg",
                 "central_heating": "assets/mobile/central_heating.svg"
               },
               "central_heating": {

@@ -1,6 +1,6 @@
 module.exports = {
-  INDOOR_TEMP     : 'measure_temperature',
-  OUTDOOR_TEMP    : 'outdoor_temperature',
+  INDOOR_TEMP     : 'measure_temperature.indoor',
+  OUTDOOR_TEMP    : 'measure_temperature.outdoor',
   TARGET_TEMP     : 'target_temperature',
   PRESSURE        : 'system_pressure',
   CLOCK_PROGRAMME : 'clock_programme',
