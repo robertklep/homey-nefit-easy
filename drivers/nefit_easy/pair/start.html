@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="./vue.min.js"></script>
+    <style>
+      #content input {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        height: 40px;
+        box-sizing: border-box;
+        padding: 0 10px 0 10px;
+        font-size: 14px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        transition: all .3s;
+        margin-bottom: 3px;
+        font-family: "Roboto";
+        font-weight: 300;
+      }
+
+      .error {
+        border: 1px solid;
+        border-radius: 3px;
+        margin: 10px 0px;
+        padding: 15px 10px 15px 15px;
+        background-repeat: no-repeat;
+        background-position: 10px center;
+        color: #D8000C;
+        background-color: #FFBABA;
+      }
+
+      .center-div {
+        position: absolute;
+        margin: auto;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100px;
+        height: 100px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="content" v-show="! isLoading">
+        <p data-i18n="pair.setup_intro"></p>
+
+        <div id="errorText" class="error" v-show="isError">
+          <p style="padding-bottom:0;" data-i18n="pair.setup_failed"></p>
+          <p style="padding-bottom:0; margin-top: 6px; font-style: italic;" data-i18n="pair.setup_failed_hint"></p>
+        </div>
+
+        <input @keyup="validateInput" v-model.trim="serialNumber" :placeholder="__('pair.serialnumber')" type="text"><br>
+        <input @keyup="validateInput" v-model.trim="accessKey"    :placeholder="__('pair.accesskey')"    type="text"><br>
+        <input @keyup="validateInput" v-model.trim="password"     :placeholder="__('pair.password')"     type="password"><br>
+
+        <button @click="submitDevice" v-bind:disabled="!isValidInput" id="submitButton" type="submit" class="button" style="margin-top:3px;" data-i18n="pair.add"></button>
+      </div>
+      <div id="loading" v-show="isLoading" class="center-div">
+        <div class="fa fa-cog fa-spin fa-5x"></div>
+      </div>
+    </div>
+    <script>
+      Homey.setTitle(__('pair.setup'));
+      new Vue({
+        el   : '#app',
+        data : {
+          isError      : false,
+          isValidInput : false,
+          isLoading    : false,
+          serialNumber : '',
+          accessKey    : '',
+          password     : '',
+        },
+        methods : {
+          submitDevice() {
+            this.isLoading = true;
+            Homey.emit('validate_device', {
+              serialNumber : this.serialNumber,
+              accessKey    : this.accessKey,
+              password     : this.password,
+            }, (err, device) => {
+              this.isLoading = false;
+              if (err || ! device) {
+                console.error('validation error', err || 'no device returned from backend');
+                this.isError = true;
+                return;
+              }
+              this.isLoading = true;
+              Homey.addDevice(device, function (err, result) {
+                this.isLoading = false;
+                if (err) {
+                  console.error('error adding device', err);
+                  this.isError = true;
+                  return;
+                }
+                // Success.
+                Homey.showView('device-added');
+              });
+            });
+          },
+          validateInput() {
+            this.isValidInput = this.serialNumber.length && this.accessKey.length && this.password.length;
+          }
+        }
+      })
+    </script>
+  </body>
+</html>

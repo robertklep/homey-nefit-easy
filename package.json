@@ -1,11 +1,10 @@
 {
   "name": "nl.nefit.easy",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Control your Nefit Easy thermostat with Homey!",
   "main": "app.js",
   "dependencies": {
-    "homey-log": "https://github.com/athombv/node-homey-log",
-    "nefit-easy-commands": "^1.8.0"
+    "nefit-easy-commands": "^1.8.1"
   },
   "devDependencies": {},
   "scripts": {
@@ -17,7 +16,7 @@
     "url": "git+https://github.com/athombv/nl.nefit.easy.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "GPLv3",
   "bugs": {
     "url": "https://github.com/athombv/nl.nefit.easy/issues"
   },
