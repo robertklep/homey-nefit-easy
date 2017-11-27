@@ -94,7 +94,9 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       value = formatValue(value);
     }
     if (this.getCapabilityValue(cap) !== value) {
-      await this.setCapabilityValue(cap, value);
+      await this.setCapabilityValue(cap, value).catch(e => {
+        this.log(`Unable to set capability '${ cap }': ${ e.message }`);
+      });
     }
   }
 
@@ -114,7 +116,11 @@ module.exports = class NefitEasyDevice extends Homey.Device {
         this.setValue(Capabilities.CENTRAL_HEATING, status['boiler indicator'] === 'central heating'),
         this.setValue(Capabilities.INDOOR_TEMP,     status['in house temp']),
         this.setValue(Capabilities.OUTDOOR_TEMP,    status['outdoor temp']),
-        this.setValue(Capabilities.TARGET_TEMP,     temp)
+        this.setValue(Capabilities.TARGET_TEMP,     temp),
+        this.setValue(Capabilities.THERMOSTAT_MODE, {
+          'central heating' : 'heat',
+          'hot water'       : 'heat', // hmm...
+        }[status['boiler indicator']] || 'off'),
       ]);
     }
 
