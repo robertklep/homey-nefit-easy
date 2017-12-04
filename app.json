@@ -131,10 +131,11 @@
       },
       "capabilities": [
         "target_temperature",
-        "measure_temperature.indoor",
+        "measure_temperature",
         "measure_temperature.outdoor",
         "clock_programme",
         "operating_mode",
+        "thermostat_mode",
         "central_heating",
         "system_pressure",
         "alarm_pressure"
@@ -146,7 +147,7 @@
             "nl": "Ingestelde temperatuur"
           }
         },
-        "measure_temperature.indoor": {
+        "measure_temperature": {
           "title": {
             "en": "Temperature",
             "nl": "Temperatuur"
@@ -197,14 +198,14 @@
           {
             "id": "sensor",
             "capabilities": [
-              "measure_temperature.indoor",
+              "measure_temperature",
               "measure_temperature.outdoor",
               "central_heating",
               "system_pressure"
             ],
             "options": {
               "icons": {
-                "measure_temperature.indoor": "assets/mobile/measure_temperature.svg",
+                "measure_temperature": "assets/mobile/measure_temperature.svg",
                 "measure_temperature.outdoor": "assets/mobile/outdoor_temperature.svg",
                 "system_pressure": "assets/mobile/system_pressure.svg",
                 "central_heating": "assets/mobile/central_heating.svg"
