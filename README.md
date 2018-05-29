@@ -6,6 +6,9 @@ IMPORTANT: This app uses an unsupported and unofficial approach, don't use the a
 
 ### Changelog
 
+3.0.0 (2018-05-29):
+- Fixes due to changes in the Nefit/Bosch backend (which stopped the app from working).
+
 2.0.1:
 - Capability changes to play nice with [HomeyKit](https://apps.athom.com/app/com.swttt.homekit). Re-adding device is required (though no enforced if the previous device entry was based on 2.0.0).
 
