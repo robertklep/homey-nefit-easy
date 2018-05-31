@@ -64,7 +64,7 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
     }
 
     // Everything checks out.
-    callback(null, { name : 'Nefit Easy', data });
+    callback(null, { name : 'Nefit Easy', data, store: { paired_with_app_version: Homey.app.manifest.version } });
   }
 
 }

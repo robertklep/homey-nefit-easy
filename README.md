@@ -6,6 +6,9 @@ IMPORTANT: This app uses an unsupported and unofficial approach, don't use the a
 
 ### Changelog
 
+3.0.2
+- Due to changes in the Nefit/Bosch backend the devices paired with the stable (pre-SDKv2) version of this App need to be repaired. This update will mark incompatible devices for re-pairing and re-establish the connection with the Nefit/Bosch backend.
+
 3.0.0 (2018-05-29):
 - Fixes due to changes in the Nefit/Bosch backend (which stopped the app from working).
 

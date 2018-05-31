@@ -1,4 +1,5 @@
 {
+  "force_repair": "Vanwege veranderingen in de Nefit Easy API moet dit apparaat opnieuw toegevoegd worden.",
   "device" : {
     "too_old" : "Dit Homey apparaat is te oud om met de huidige versie van de app te kunnen werken. Verwijder dit apparaat en maak een nieuw apparaat aan.",
     "connecting" : "Verbinding maken met Nefit Easy",

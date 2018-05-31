@@ -33,8 +33,11 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       throw e;
     }
 
-    // Save the app version (3.0.1) in the device's store
-    this.setStoreValue(PAIRED_WITH_APP_VERSION, Homey.app.manifest.version);
+    // If device was paired with pre-SDKv2 version force re-pair
+	const pairedWithAppVersion = this.getStoreValue(PAIRED_WITH_APP_VERSION);
+	if (!pairedWithAppVersion) {
+      return this.setUnavailable(Homey.__('force_repair'));
+	}
 
     // Device is available.
     await this.setAvailable();
