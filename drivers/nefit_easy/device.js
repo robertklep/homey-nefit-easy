@@ -3,6 +3,7 @@ const NefitEasyClient = require('nefit-easy-commands');
 const Capabilities    = require('./capabilities');
 
 const DEBOUNCE_RATE = 500;
+const PAIRED_WITH_APP_VERSION = 'paired_with_app_version';
 const formatValue   = t => Math.round(t.toFixed(1) * 10) / 10
 
 // Log stack for unhandled rejections.
@@ -31,6 +32,9 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       this.log(`unable to initialize device: ${ e.message }`);
       throw e;
     }
+
+    // Save the app version (3.0.1) in the device's store
+    this.setStoreValue(PAIRED_WITH_APP_VERSION, Homey.app.manifest.version);
 
     // Device is available.
     await this.setAvailable();
