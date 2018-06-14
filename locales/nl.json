@@ -1,4 +1,10 @@
 {
+  "force_repair": "Vanwege veranderingen in de Nefit Easy API moet dit apparaat opnieuw toegevoegd worden.",
+  "device" : {
+    "too_old" : "Dit Homey apparaat is te oud om met de huidige versie van de app te kunnen werken. Verwijder dit apparaat en maak een nieuw apparaat aan.",
+    "connecting" : "Verbinding maken met Nefit Easy",
+    "sync_error" : "Fout tijdens sync"
+  },
   "pair": {
     "setup_intro": "Om Homey met je Nefit Easy te laten samenwerken hebben we wat meer informatie nodig.",
     "setup_failed": "Homey kon je Nefit Easy niet vinden, of dit apparaat is al toegevoegd, controleer of de gegevens hieronder kloppen en probeer het opnieuw.",
@@ -13,5 +19,8 @@
     "done": "Nefit Easy toegevoegd"
   },
   "not_reachable": "Het apparaat kon niet worden bereikt",
-  "reconnecting": "Bezig met verbinden"
+  "reconnecting": "Bezig met verbinden",
+  "settings" : {
+    "password" : "Kan nieuw wachtwoord niet valideren"
+  }
 }

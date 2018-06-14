@@ -1,7 +1,8 @@
 {
   "id": "nl.nefit.easy",
-  "version": "1.0.7",
-  "compatibility": ">=0.8.30",
+  "sdk": 2,
+  "version": "3.0.2",
+  "compatibility": ">=1.5.0",
   "name": {
     "en": "Nefit Easy",
     "nl": "Nefit Easy"
@@ -13,16 +14,113 @@
   "author": {
     "name": "Athom B.V."
   },
+  "contributors" : {
+    "developers" : [
+      {
+        "name" : "Robert Klep",
+        "email" : "robert@klep.name"
+      }
+    ]
+  },
   "category": "climate",
+  "tags" : {
+    "en" : [ "thermostat", "nefit", "easy", "heating", "central heating" ],
+    "nl" : [ "thermostaat", "nefit", "easy", "verwarming", "centrale verwarming", "cv" ]
+  },
   "images": {
     "large": "assets/images/large.jpg",
     "small": "assets/images/small.jpg"
   },
   "permissions": [],
   "speech": [],
+  "capabilities": {
+    "system_pressure": {
+      "type": "number",
+      "units": {
+        "en": "bar",
+        "nl": "bar"
+      },
+      "title": {
+        "en": "Pressure",
+        "nl": "Druk"
+      },
+      "desc": {
+        "en": "System pressure in bar",
+        "nl": "Systeemdruk in bar"
+      },
+      "getable": true,
+      "setable": false,
+      "chartType": "stepLine",
+      "decimals": 1
+    },
+    "alarm_pressure": {
+      "type": "boolean",
+      "title": {
+        "en": "Pressure Alarm",
+        "nl": "Drukalarm"
+      },
+      "desc": {
+        "en": "System pressure is too low/high",
+        "nl": "Systeemdruk is te laag/hoog"
+      },
+      "getable": true,
+      "setable": false
+    },
+    "clock_programme": {
+      "type": "boolean",
+      "title": {
+        "en": "Clock Programme",
+        "nl": "Klokprogramma"
+      },
+      "getable": true,
+      "setable": true
+    },
+    "operating_mode": {
+      "type": "enum",
+      "title": {
+        "en": "Operating Mode",
+        "nl": "Bedrijfsmodus"
+      },
+      "values": [
+        {
+          "id": "hot water",
+          "title": {
+            "en": "Hot Water",
+            "nl": "Warmwater"
+          }
+        },
+        {
+          "id": "central heating",
+          "title": {
+            "en": "Central Heating",
+            "nl": "CV"
+          }
+        },
+        {
+          "id": "off",
+          "title": {
+            "en": "Off",
+            "nl": "Uit"
+          }
+        }
+      ],
+      "getable": true,
+      "setable": false
+    },
+    "central_heating": {
+      "type": "boolean",
+      "title": {
+        "en": "Central Heating",
+        "nl": "Verwarming"
+      },
+      "getable": true,
+      "setable": true
+    }
+  },
   "drivers": [
     {
       "id": "nefit_easy",
+      "class": "thermostat",
       "name": {
         "en": "Nefit Easy",
         "nl": "Nefit Easy"
@@ -31,20 +129,347 @@
         "large": "drivers/nefit_easy/assets/images/large.png",
         "small": "drivers/nefit_easy/assets/images/small.png"
       },
-      "class": "thermostat",
       "capabilities": [
         "target_temperature",
-        "measure_temperature"
+        "measure_temperature",
+        "measure_temperature.outdoor",
+        "clock_programme",
+        "operating_mode",
+        "thermostat_mode",
+        "central_heating",
+        "system_pressure",
+        "alarm_pressure"
       ],
+      "capabilitiesOptions": {
+        "target_temperature": {
+          "title": {
+            "en": "Target temperature",
+            "nl": "Ingestelde temperatuur"
+          }
+        },
+        "measure_temperature": {
+          "title": {
+            "en": "Temperature",
+            "nl": "Temperatuur"
+          }
+        },
+        "measure_temperature.outdoor": {
+          "title": {
+            "en": "Outdoor temperature",
+            "nl": "Temperatuur buiten"
+          }
+        },
+        "system_pressure": {
+          "title": {
+            "en": "Pressure",
+            "nl": "Druk"
+          }
+        },
+        "clock_programme": {
+          "title": {
+            "en": "Clock Programme",
+            "nl": "Klokprogramma"
+          }
+        },
+        "operating_mode": {
+          "title": {
+            "en": "Operating Mode",
+            "nl": "Bedrijfsmodus"
+          }
+        },
+        "central_heating": {
+          "title": {
+            "en": "Central Heating",
+            "nl": "Verwarming"
+          }
+        },
+        "alarm_pressure": {
+          "title": {
+            "en": "System pressure is too low/high",
+            "nl": "Systeemdruk is te laag/hoog"
+          }
+        }
+      },
+      "mobile": {
+        "components": [
+          {
+            "id": "icon"
+          },
+          {
+            "id": "sensor",
+            "capabilities": [
+              "measure_temperature",
+              "measure_temperature.outdoor",
+              "central_heating",
+              "system_pressure"
+            ],
+            "options": {
+              "icons": {
+                "measure_temperature": "assets/mobile/measure_temperature.svg",
+                "measure_temperature.outdoor": "assets/mobile/outdoor_temperature.svg",
+                "system_pressure": "assets/mobile/system_pressure.svg",
+                "central_heating": "assets/mobile/central_heating.svg"
+              },
+              "central_heating": {
+                "label": {
+                  "true": {
+                    "en": "On",
+                    "nl": "Aan"
+                  },
+                  "false": {
+                    "en": "Off",
+                    "nl": "Uit"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "id": "thermostat",
+            "capabilities": [
+              "target_temperature"
+            ]
+          }
+        ]
+      },
       "pair": [
         {
-          "id": "nefit_setup"
+          "id": "start"
         },
         {
-          "id": "add_nefit_easy"
+          "id": "device-added"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Synchronization",
+            "nl": "Synchronisatie"
+          },
+          "children": [
+            {
+              "id": "syncInterval",
+              "type": "number",
+              "label": {
+                "en": "Interval",
+                "nl": "Interval"
+              },
+              "value": 60,
+              "attr": {
+                "min": 30,
+                "max": 600
+              },
+              "hint": {
+                "en": "How often, in seconds, should Homey ask the Nefit Easy for a status update?",
+                "nl": "Hoe vaak, in seconden, moet Homey de Nefit Easy voor een status update vragen?"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Pressure Alarm",
+            "nl": "Drukalarm"
+          },
+          "children": [
+            {
+              "id": "pressureTooLow",
+              "type": "number",
+              "value": 1.5,
+              "label": {
+                "en": "Lower limit (in bar)",
+                "nl": "Ondergrens (in bar)"
+              },
+              "attr": {
+                "min": 0,
+                "max": 10,
+                "step": 0.1
+              }
+            },
+            {
+              "id": "pressureTooHigh",
+              "type": "number",
+              "value": 2.8,
+              "label": {
+                "en": "Upper limit (in bar)",
+                "nl": "Bovengrens (in bar)"
+              },
+              "attr": {
+                "min": 0,
+                "max": 10,
+                "step": 0.1
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Authentication",
+            "nl": "Authenticatie"
+          },
+          "children": [
+            {
+              "id": "serialNumber",
+              "type": "label",
+              "value": "",
+              "label": {
+                "en": "Serial Number",
+                "nl": "Serienummer"
+              }
+            },
+            {
+              "id": "accessKey",
+              "type": "label",
+              "value": "",
+              "label": {
+                "en": "Access Key",
+                "nl": "Toegangscode"
+              }
+            },
+            {
+              "id": "password",
+              "type": "password",
+              "value": "",
+              "label": {
+                "en": "Password",
+                "nl": "Wachtwoord"
+              },
+              "hint": {
+                "en": "Use this only when the password for your Nefit Easy has changed.",
+                "nl": "Gebruik dit alleen als het wachtwoord van je Nefit Easy veranderd is."
+              }
+            }
+          ]
         }
       ]
     }
   ],
-  "flow": {}
+  "flow": {
+    "triggers": [
+      {
+        "id": "operating_mode_changed",
+        "title": {
+          "en": "Operating mode changed",
+          "nl": "Bedrijfsmodus is veranderd"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "operating_mode",
+            "type": "string",
+            "title": {
+              "en": "Mode",
+              "nl": "Modus"
+            },
+            "example": {
+              "en": "Hot Water",
+              "nl": "Warmwater"
+            }
+          }
+        ]
+      },
+      {
+        "id": "system_pressure_changed",
+        "title": {
+          "en": "System pressure changed",
+          "nl": "Systeemdruk is veranderd"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "system_pressure",
+            "type": "number",
+            "title": {
+              "en": "Pressure",
+              "nl": "Druk"
+            },
+            "example": 1.8
+          }
+        ]
+      },
+      {
+        "id": "alarm_pressure_active",
+        "title": {
+          "en": "Pressure alarm activated",
+          "nl": "Drukalarm geactiveerd"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "system_pressure",
+            "type": "number",
+            "title": {
+              "en": "Pressure",
+              "nl": "Druk"
+            },
+            "example": 1.8
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "operating_mode_matches",
+        "title": {
+          "en": "Operating mode !{{matches|doesn't match}}",
+          "nl": "Bedrijfsmodus !{{is|is niet}}"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=nefit_easy"
+          },
+          {
+            "name": "mode",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "hot water",
+                "label": {
+                  "en": "Hot Water",
+                  "nl": "Warmwater"
+                }
+              },
+              {
+                "id": "central heating",
+                "label": {
+                  "en": "Central Heating",
+                  "nl": "CV"
+                }
+              },
+              {
+                "id": "off",
+                "label": {
+                  "en": "Off",
+                  "nl": "Uit"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 }
