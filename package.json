@@ -8,17 +8,16 @@
   },
   "devDependencies": {},
   "scripts": {
-    "run": "homeyConfig compose && athom project --run",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "homeyConfig compose && athom app run"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/athombv/nl.nefit.easy.git"
+    "url": "git+https://github.com/robertklep/nl.nefit.easy.git"
   },
-  "author": "",
-  "license": "GPLv3",
+  "author": "Robert Klep <robert@klep.name>",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/athombv/nl.nefit.easy/issues"
+    "url": "https://github.com/robertklep/nl.nefit.easy/issues"
   },
-  "homepage": "https://github.com/athombv/nl.nefit.easy#readme"
+  "homepage": "https://github.com/robertklep/nl.nefit.easy#readme"
 }
