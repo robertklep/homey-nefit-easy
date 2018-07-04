@@ -1,7 +1,7 @@
 {
   "id": "nl.nefit.easy",
   "sdk": 2,
-  "version": "3.0.2",
+  "version": "3.0.3",
   "compatibility": ">=1.5.0",
   "name": {
     "en": "Nefit Easy",
@@ -12,7 +12,8 @@
     "nl": "Nefit Easy thermostaat"
   },
   "author": {
-    "name": "Athom B.V."
+    "name": "Robert Klep",
+    "email": "robert@klep.name"
   },
   "contributors" : {
     "developers" : [
