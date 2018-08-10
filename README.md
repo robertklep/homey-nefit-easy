@@ -6,6 +6,9 @@ IMPORTANT: This app uses an unsupported and unofficial approach, don't use the a
 
 ### Changelog
 
+3.1.1 (2018-08-10):
+- Possible memory leak fix
+
 3.1.0 (2018-08-01):
 - Updated core Nefit library to improve autoreconnect behaviour
 
