@@ -6,6 +6,9 @@ IMPORTANT: This app uses an unsupported and unofficial approach, don't use the a
 
 ### Changelog
 
+3.2.0 (2018-08-21):
+- Reverted to previous XMPP client (more resource-friendly)
+
 3.1.1 (2018-08-10):
 - Possible memory leak fix
 
