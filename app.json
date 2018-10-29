@@ -473,6 +473,42 @@
           }
         ]
       }
+    ],
+    "actions" : [
+      {
+        "id" : "set_clock_program",
+        "title" : {
+          "en" : "Clock program",
+          "nl" : "Klokprogramma"
+        },
+        "args": [
+          {
+            "name" : "value",
+            "type" : "dropdown",
+            "values" : [
+              {
+                "id" : "on",
+                "label" : {
+                  "en" : "On",
+                  "nl" : "Aan"
+                }
+              },
+              {
+                "id" : "off",
+                "label" : {
+                  "en" : "Off (manual mode)",
+                  "nl" : "Uit (handmatige modus)"
+                }
+              }
+            ]
+          },
+          {
+            "name" : "device",
+            "type" : "device",
+            "filter": "driver_id=nefit_easy"
+          }
+        ]
+      }
     ]
   }
 }
