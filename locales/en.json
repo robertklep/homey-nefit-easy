@@ -16,7 +16,8 @@
     "setup": "Nefit Easy Setup",
     "password": "Password",
     "add": "Add device",
-    "done": "Added Nefit Easy"
+    "done": "Added Nefit Easy",
+    "password_too_long" : "Please limit your Nefit Easy password to 10 characters or less."
   },
   "not_reachable": "This device could not be reached",
   "reconnecting": "Trying to reconnect",

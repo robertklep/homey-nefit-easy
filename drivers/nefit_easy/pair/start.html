@@ -76,6 +76,9 @@
         },
         methods : {
           submitDevice() {
+            if (this.password.length > 10) {
+              return Homey.alert(__('pair.password_too_long'));
+            }
             this.isLoading = true;
             Homey.emit('validate_device', {
               serialNumber : this.serialNumber,
