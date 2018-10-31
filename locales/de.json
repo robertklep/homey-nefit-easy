@@ -1,0 +1,26 @@
+{
+  "force_repair": "Durch große Veränderungen in der Nefit Easy API muss dieses Gerät neu verbunden werden.",
+  "device" : {
+    "too_old" : "Dieses Homey Gerät ist zu alt um mit der aktuellen Version der App funktionieren zu können. Bitte entfernen Sie dieses und fügen Sie ein neues Gerät hinzu.",
+    "connecting" : "Verbide zu Nefit Easy",
+    "sync_error" : "Fehler beim Synchronisieren"
+  },
+  "pair": {
+    "setup_intro": "Damit Homey mit Nefit Easy kommunizieren kann benötigen wir weitere Informationen.",
+    "setup_failed": "Homey konnte Ihr Nefit Easy nicht finden, oder das Gerät wurde bereits hinzugefügt. Bitte stellen Sie sicher dass die eingegebenen Zugangsdaten richtig sind und versuchen Sie es erneut.",
+    "setup_failed_hint": "Hinweis: Wenn Sie sich nicht mehr an ihre Zugangsdaten erinnern können, schauen Sie auf die Verpackung des Nefit Easy Handbuchs.",
+    "setup_succeeded": "Ihr Nefit Easy wurde erfolgreich hinzugefügt!",
+    "settings": "Einstellungen",
+    "serialnumber": "Seriennummer",
+    "accesskey": "Zugangsschlüssel",
+    "setup": "Nefit Easy Einrichtung",
+    "password": "Passwort",
+    "add": "Gerät hinzufügen",
+    "done": "Nefit Easy hinzugefügt"
+  },
+  "not_reachable": "Dieses Gerät konnte nicht erreicht werden",
+  "reconnecting": "Versuche erneut zu verbinden",
+  "settings" : {
+    "password" : "Validierung des neuen Passworts fehlgeschlagen"
+  }
+}
