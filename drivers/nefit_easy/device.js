@@ -72,6 +72,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
   registerCapabilities() {
     this.registerMultipleCapabilityListener([ Capabilities.TARGET_TEMP ],     this.onSetTargetTemperature.bind(this), DEBOUNCE_RATE);
     this.registerMultipleCapabilityListener([ Capabilities.CLOCK_PROGRAMME ], this.onSetClockProgramme   .bind(this), DEBOUNCE_RATE);
+    this.registerMultipleCapabilityListener([ Capabilities.FIREPLACE_MODE ],  this.onSetFireplaceMode    .bind(this), DEBOUNCE_RATE);
   }
 
   // Get a (connected) instance of the Nefit Easy client.
@@ -119,6 +120,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       this.log('...updating status');
       await Promise.all([
         this.setValue(Capabilities.CLOCK_PROGRAMME, status['user mode'] === 'clock'),
+        this.setValue(Capabilities.FIREPLACE_MODE,  status['fireplace mode']),
         this.setValue(Capabilities.OPERATING_MODE,  status['boiler indicator']),
         this.setValue(Capabilities.CENTRAL_HEATING, status['boiler indicator'] === 'central heating'),
         this.setValue(Capabilities.INDOOR_TEMP,     status['in house temp']),
@@ -198,6 +200,28 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
         return this.setValue(Capabilities.CLOCK_PROGRAMME, value);
+      }
+    });
+  }
+
+  // Enable/disable fireplace mode.
+  async onSetFireplaceMode(data, opts) {
+    let value = data[Capabilities.FIREPLACE_MODE];
+    this.log('setting fireplace mode to', value ? 'on' : 'off');
+
+    // Retrieve current status from backend.
+    let status = await this.client.status();
+    let currentValue = status['fireplace mode'] === true;
+
+    if (currentValue === value) {
+      this.log('(value matches current, not updating)');
+      return true;
+    }
+
+    return this.client.setFireplaceMode(value).then(s => {
+      this.log('...status:', s.status);
+      if (s.status === 'ok') {
+        return this.setValue(Capabilities.FIREPLACE_MODE, value);
       }
     });
   }

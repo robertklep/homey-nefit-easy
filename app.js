@@ -10,6 +10,7 @@ module.exports = class NefitEasyApp extends Homey.App {
 
     // Register actions.
     this.registerAction('set_clock_program');
+    this.registerAction('set_fireplace_mode');
   }
 
   registerAction(name) {
@@ -20,5 +21,9 @@ module.exports = class NefitEasyApp extends Homey.App {
 
   async setClockProgramAction(args, state) {
     return args.device.onSetClockProgramme({ clock_programme : args.value === 'on' });
+  }
+
+  async setFireplaceModeAction(args, state) {
+    return args.device.onSetFireplaceMode({ fireplace_mode : args.value === 'on' });
   }
 }
