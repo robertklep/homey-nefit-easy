@@ -11,6 +11,7 @@ module.exports = class NefitEasyApp extends Homey.App {
     // Register actions.
     this.registerAction('set_clock_program');
     this.registerAction('set_fireplace_mode');
+    this.registerAction('set_holiday_mode');
   }
 
   registerAction(name) {
@@ -25,5 +26,9 @@ module.exports = class NefitEasyApp extends Homey.App {
 
   async setFireplaceModeAction(args, state) {
     return args.device.onSetFireplaceMode({ fireplace_mode : args.value === 'on' });
+  }
+
+  async setHolidayModeAction(args, state) {
+    return args.device.onSetHolidayMode({ holiday_mode : args.value === 'on' });
   }
 }

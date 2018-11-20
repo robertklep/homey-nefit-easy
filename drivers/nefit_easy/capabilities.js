@@ -9,4 +9,5 @@ module.exports = {
   CENTRAL_HEATING: 'central_heating',
   ALARM_PRESSURE:  'alarm_pressure',
   FIREPLACE_MODE:  'fireplace_mode',
+  HOLIDAY_MODE:    'holiday_mode',
 }

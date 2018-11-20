@@ -127,6 +127,15 @@
       },
       "getable": true,
       "setable": true
+    },
+    "holiday_mode": {
+      "type": "boolean",
+      "title": {
+        "en": "Holiday programme",
+        "nl": "Vakantieprogramma"
+      },
+      "getable": true,
+      "setable": true
     }
   },
   "drivers": [
@@ -151,7 +160,8 @@
         "central_heating",
         "system_pressure",
         "alarm_pressure",
-        "fireplace_mode"
+        "fireplace_mode",
+        "holiday_mode"
       ],
       "capabilitiesOptions": {
         "target_temperature": {
@@ -190,6 +200,12 @@
             "nl": "Openhaard functie"
           }
         },
+        "holiday_mode": {
+          "title": {
+            "en": "Holiday program",
+            "nl": "Vakantieprogramma"
+          }
+        },
         "operating_mode": {
           "title": {
             "en": "Operating Mode",
@@ -222,7 +238,8 @@
               "central_heating",
               "system_pressure",
               "clock_programme",
-              "fireplace_mode"
+              "fireplace_mode",
+              "holiday_mode"
             ],
             "options": {
               "icons": {
@@ -231,7 +248,8 @@
                 "system_pressure": "assets/mobile/system_pressure.svg",
                 "central_heating": "assets/mobile/central_heating.svg",
                 "clock_programme": "assets/mobile/clock_programme.svg",
-                "fireplace_mode": "assets/mobile/fireplace_mode.svg"
+                "fireplace_mode": "assets/mobile/fireplace_mode.svg",
+                "holiday_mode": "assets/mobile/holiday_mode.svg"
               },
               "central_heating": {
                 "label": {
@@ -500,6 +518,40 @@
         "title" : {
           "en" : "Fireplace function",
           "nl" : "Openhaard functie"
+        },
+        "args": [
+          {
+            "name" : "value",
+            "type" : "dropdown",
+            "values" : [
+              {
+                "id" : "on",
+                "label" : {
+                  "en" : "On",
+                  "nl" : "Aan"
+                }
+              },
+              {
+                "id" : "off",
+                "label" : {
+                  "en" : "Off",
+                  "nl" : "Uit"
+                }
+              }
+            ]
+          },
+          {
+            "name" : "device",
+            "type" : "device",
+            "filter": "driver_id=nefit_easy"
+          }
+        ]
+      },
+      {
+        "id" : "set_holiday_mode",
+        "title" : {
+          "en" : "Holiday mode",
+          "nl" : "Vakantieprogramma"
         },
         "args": [
           {
