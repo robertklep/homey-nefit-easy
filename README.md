@@ -6,6 +6,12 @@ IMPORTANT: This app uses an unsupported and unofficial approach, don't use the a
 
 ### Changelog
 
+3.3.0 (2018-11-26):
+- Added "clock program" support
+- Added "fireplace mode" support (requires re-pair)
+- Added "holiday mode" support (requires re-pair)
+- Issue a warning during pairing when password length exceeds 10 characters
+
 3.2.0 (2018-08-21):
 - Reverted to previous XMPP client (more resource-friendly)
 
@@ -29,3 +35,7 @@ IMPORTANT: This app uses an unsupported and unofficial approach, don't use the a
 
 2.0.0:
 - Update to SDKv2, add various capabilities and functionalities. Re-adding device is enforced.
+
+### Acknowledgements
+
+Some icons were made by Freepik and Monkik from www.flaticon.com
