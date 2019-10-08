@@ -6,6 +6,12 @@ IMPORTANT: This app uses an unsupported and unofficial approach, don't use the a
 
 ### Changelog
 
+3.3.2 (2019-10-08):
+- Fix an issue with the operating mode condition card (#16)
+
+3.3.1 (2018-11-26):
+- HTML fixes
+
 3.3.0 (2018-11-26):
 - Added "clock program" support
 - Added "fireplace mode" support (requires re-pair)
