@@ -19,7 +19,7 @@ module.exports = class NefitEasyDriver extends Homey.Driver {
 
     this._conditions = {
       operating_mode_matches : new Homey.FlowCardCondition('operating_mode_matches').register().registerRunListener(( args, state ) => {
-        return Promise.resolve(args.mode === state[ Capabilities.OPERATING_MODE ]);
+        return Promise.resolve(args.mode === state.value);
       })
     }
   }
