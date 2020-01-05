@@ -4,6 +4,12 @@ Control your Nefit Easy thermostat with Homey!
 
 IMPORTANT: This app uses an unsupported and unofficial approach, don't use the app excessively or you might risk being blocked from the Nefit Easy API (temporarily). With regular usage you should not experience any problems. A consequence of this unofficial approach is that the app can only poll to update data every 60 seconds, therefore temperature changed triggers might be delayed a bit.
 
+### DEPRECATED
+
+Because I stopped using Homey, and also because I moved house and my new home doesn't use Nefit devices, I can no longer properly support this app, which means I won't be implementing new features or bugfixes.
+
+If another developer wants to assume responsibility for further development of this app, feel free to contact me.
+
 ### Changelog
 
 3.2.0 (2018-08-21):
