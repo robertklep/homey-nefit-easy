@@ -1,5 +1,5 @@
 const Homey           = require('homey');
-const NefitEasyClient = require('nefit-easy-commands');
+const NefitEasyClient = require('./client');
 const Capabilities    = require('./capabilities');
 
 const DEBOUNCE_RATE = 500;
@@ -34,10 +34,10 @@ module.exports = class NefitEasyDevice extends Homey.Device {
     }
 
     // If device was paired with pre-SDKv2 version force re-pair
-	const pairedWithAppVersion = this.getStoreValue(PAIRED_WITH_APP_VERSION);
-	if (!pairedWithAppVersion) {
-      return this.setUnavailable(Homey.__('force_repair'));
-	}
+    const pairedWithAppVersion = this.getStoreValue(PAIRED_WITH_APP_VERSION);
+    if (! pairedWithAppVersion) {
+        return this.setUnavailable(Homey.__('force_repair'));
+    }
 
     // Device is available.
     await this.setAvailable();
@@ -72,11 +72,13 @@ module.exports = class NefitEasyDevice extends Homey.Device {
   registerCapabilities() {
     this.registerMultipleCapabilityListener([ Capabilities.TARGET_TEMP ],     this.onSetTargetTemperature.bind(this), DEBOUNCE_RATE);
     this.registerMultipleCapabilityListener([ Capabilities.CLOCK_PROGRAMME ], this.onSetClockProgramme   .bind(this), DEBOUNCE_RATE);
+    this.registerMultipleCapabilityListener([ Capabilities.FIREPLACE_MODE ],  this.onSetFireplaceMode    .bind(this), DEBOUNCE_RATE);
+    this.registerMultipleCapabilityListener([ Capabilities.HOLIDAY_MODE ],    this.onSetHolidayMode      .bind(this), DEBOUNCE_RATE);
   }
 
   // Get a (connected) instance of the Nefit Easy client.
   async getClient(settings) {
-    let client = NefitEasyClient({
+    let client = new NefitEasyClient({
       serialNumber : settings.serialNumber,
       accessKey    : settings.accessKey,
       password     : settings.password,
@@ -110,7 +112,11 @@ module.exports = class NefitEasyDevice extends Homey.Device {
   // Update device status by querying the backend (which in
   // turn proxies the requests to the Nefit Easy device).
   async updateStatus() {
-    let [ status, pressure ] = await Promise.all([ this.client.status(), this.client.pressure() ]);
+    let [ status, pressure, holidayStatus ] = await Promise.all([
+      this.client.status(),
+      this.client.pressure(),
+      this.client.holidayMode(),
+    ]);
 
     // Update modes and temperatures.
     if (status) {
@@ -119,6 +125,7 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       this.log('...updating status');
       await Promise.all([
         this.setValue(Capabilities.CLOCK_PROGRAMME, status['user mode'] === 'clock'),
+        this.setValue(Capabilities.FIREPLACE_MODE,  status['fireplace mode']),
         this.setValue(Capabilities.OPERATING_MODE,  status['boiler indicator']),
         this.setValue(Capabilities.CENTRAL_HEATING, status['boiler indicator'] === 'central heating'),
         this.setValue(Capabilities.INDOOR_TEMP,     status['in house temp']),
@@ -129,6 +136,10 @@ module.exports = class NefitEasyDevice extends Homey.Device {
           'hot water'       : 'heat', // hmm...
         }[status['boiler indicator']] || 'off'),
       ]);
+    }
+
+    if (holidayStatus) {
+      this.setValue(Capabilities.HOLIDAY_MODE, holidayStatus.value === 'on');
     }
 
     // Update pressure.
@@ -198,6 +209,50 @@ module.exports = class NefitEasyDevice extends Homey.Device {
       this.log('...status:', s.status);
       if (s.status === 'ok') {
         return this.setValue(Capabilities.CLOCK_PROGRAMME, value);
+      }
+    });
+  }
+
+  // Enable/disable fireplace mode.
+  async onSetFireplaceMode(data, opts) {
+    let value = data[Capabilities.FIREPLACE_MODE];
+    this.log('setting fireplace mode to', value ? 'on' : 'off');
+
+    // Retrieve current status from backend.
+    let status = await this.client.status();
+    let currentValue = status['fireplace mode'] === true;
+
+    if (currentValue === value) {
+      this.log('(value matches current, not updating)');
+      return true;
+    }
+
+    return this.client.setFireplaceMode(value).then(s => {
+      this.log('...status:', s.status);
+      if (s.status === 'ok') {
+        return this.setValue(Capabilities.FIREPLACE_MODE, value);
+      }
+    });
+  }
+
+  // Enable/disable holiday mode.
+  async onSetHolidayMode(data, opts) {
+    let value = data[Capabilities.HOLIDAY_MODE];
+    this.log('setting holiday mode to', value ? 'on' : 'off');
+
+    // Retrieve current status from backend.
+    let status = await this.client.holidayMode();
+    let currentValue = status.value === 'on';
+
+    if (currentValue === value) {
+      this.log('(value matches current, not updating)');
+      return true;
+    }
+
+    return this.client.setHolidayMode(value).then(s => {
+      this.log('...status:', s.status);
+      if (s.status === 'ok') {
+        return this.setValue(Capabilities.HOLIDAY_MODE, value);
       }
     });
   }

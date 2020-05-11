@@ -1,9 +1,10 @@
 <!doctype html>
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <script src="./vue.min.js"></script>
     <style>
-      #content input {
+      #nefit-easy input {
         width: 100%;
         border: 1px solid #ddd;
         border-radius: 3px;
@@ -18,7 +19,7 @@
         font-weight: 300;
       }
 
-      .error {
+      #nefit-easy .error {
         border: 1px solid;
         border-radius: 3px;
         margin: 10px 0px;
@@ -29,7 +30,7 @@
         background-color: #FFBABA;
       }
 
-      .center-div {
+      #nefit-easy .center-div {
         position: absolute;
         margin: auto;
         top: 0;
@@ -40,10 +41,26 @@
         height: 100px;
       }
 
+      #nefit-easy button {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 15px;
+        font-size: 12px;
+        background-color: #4caf50;
+        color: #fff;
+        border-color: #4caf50;
+        border-radius: 4px;
+      }
+
+      #nefit-easy button:disabled {
+        background-color: #ccc;
+        border-color: #ccc;
+      }
+
     </style>
   </head>
   <body>
-    <div id="app">
+    <div id="nefit-easy">
       <div id="content" v-show="! isLoading">
         <p data-i18n="pair.setup_intro"></p>
 
@@ -52,20 +69,20 @@
           <p style="padding-bottom:0; margin-top: 6px; font-style: italic;" data-i18n="pair.setup_failed_hint"></p>
         </div>
 
-        <input @keyup="validateInput" v-model.trim="serialNumber" :placeholder="__('pair.serialnumber')" type="text"><br>
-        <input @keyup="validateInput" v-model.trim="accessKey"    :placeholder="__('pair.accesskey')"    type="text"><br>
-        <input @keyup="validateInput" v-model.trim="password"     :placeholder="__('pair.password')"     type="password"><br>
+        <input @keyup="validateInput" v-model.trim="serialNumber" :placeholder="Homey.__('pair.serialnumber')" type="text"><br>
+        <input @keyup="validateInput" v-model.trim="accessKey"    :placeholder="Homey.__('pair.accesskey')"    type="text"><br>
+        <input @keyup="validateInput" v-model.trim="password"     :placeholder="Homey.__('pair.password')"     type="password"><br>
 
-        <button @click="submitDevice" v-bind:disabled="!isValidInput" id="submitButton" type="submit" class="button" style="margin-top:3px;" data-i18n="pair.add"></button>
+        <button @click="submitDevice" v-bind:disabled="!isValidInput" id="submitButton" type="submit" class="button" style="margin-top:3px;" data-i18n="pair.add">Add</button>
       </div>
       <div id="loading" v-show="isLoading" class="center-div">
         <div class="fa fa-cog fa-spin fa-5x"></div>
       </div>
     </div>
     <script>
-      Homey.setTitle(__('pair.setup'));
+      Homey.setTitle(Homey.__('pair.setup'));
       new Vue({
-        el   : '#app',
+        el   : '#nefit-easy',
         data : {
           isError      : false,
           isValidInput : false,
@@ -74,8 +91,19 @@
           accessKey    : '',
           password     : '',
         },
+        watch : {
+          serialNumber(value) {
+            this.serialNumber = value.replace(/\s/g, '');
+          },
+          accessKey(value) {
+            this.accessKey = value.replace(/\s/g, '');
+          }
+        },
         methods : {
           submitDevice() {
+            if (this.password.length > 10) {
+              return Homey.alert(Homey.__('pair.password_too_long'));
+            }
             this.isLoading = true;
             Homey.emit('validate_device', {
               serialNumber : this.serialNumber,

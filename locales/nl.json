@@ -16,7 +16,8 @@
     "setup": "Nefit Easy Setup",
     "password": "Wachtwoord",
     "add": "Voeg toe",
-    "done": "Nefit Easy toegevoegd"
+    "done": "Nefit Easy toegevoegd",
+    "password_too_long" : "Zorg ervoor dat het wachtwoord niet langer is dan 10 karakters."
   },
   "not_reachable": "Het apparaat kon niet worden bereikt",
   "reconnecting": "Bezig met verbinden",
